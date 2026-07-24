@@ -26,6 +26,8 @@ git commit -m "feat(core): add compression engine"
 
 WARNING: never expose API keys
 
+## Workflow
+
 Type `confirm` before running destructive operations with `--force`.
 
 1. First step in the workflow
