@@ -69,7 +69,8 @@ function formatStatsLine(params: {
   ].join(" | ");
 }
 
-function unifiedDiff(original: string, compressed: string): string {
+/** Line-alignment preview — not a unified/LCS diff (insertions shift later lines). */
+function lineAlignmentPreview(original: string, compressed: string): string {
   const origLines = original.split("\n");
   const compLines = compressed.split("\n");
   const lines: string[] = ["--- original", "+++ compressed"];
@@ -211,7 +212,7 @@ async function runCompress(
     );
 
     if (options.diff) {
-      console.log(unifiedDiff(original, compressed));
+      console.log(lineAlignmentPreview(original, compressed));
     }
 
     if (!validation.ok) {
@@ -367,7 +368,11 @@ cli
   .description("Compress rule/memory markdown files")
   .option("-m, --mode <safe|balanced|aggressive>", "Compression mode", "balanced")
   .option("--dry-run", "Show estimated token savings without writing", false)
-  .option("--diff", "Show unified diff of changes", false)
+  .option(
+    "--diff",
+    "Show line-alignment preview of changes (not a unified/LCS diff)",
+    false,
+  )
   .option("-y, --yes", "Compress all detected canonical files without prompting", false)
   .action(async (path: string | undefined, rawOptions: Record<string, unknown>) => {
     const parsedResult = OptionsSchema.safeParse({
