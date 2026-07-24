@@ -19,7 +19,7 @@ const CONVENTIONAL_COMMIT_REGEX =
 const SECURITY_LINE_REGEX =
   /^\s*(SECURITY|WARNING|DO NOT|NEVER|ALWAYS|CRITICAL|DANGER|CAUTION)\b.*$/gim;
 const IRREVERSIBLE_REGEX =
-  /confirm|irreversible|destructive|--force|rm -rf|DROP TABLE|DELETE FROM|git push --force|git reset --hard/gim;
+  /\bconfirm\b|\birreversible\b|\bdestructive\b|--force|\brm -rf\b|\bDROP TABLE\b|\bDELETE FROM\b|git push --force|git reset --hard/gim;
 const ORDERED_LIST_REGEX = /^\s*\d+\.\s.*$/gim;
 
 const CATEGORY_PATTERNS: Array<{
