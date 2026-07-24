@@ -97,13 +97,33 @@ function isCanonicalPath(resolvedPath: string): boolean {
   return resolvedPath.includes(".cursor/rules/") && base.endsWith(".mdc");
 }
 
-async function hardenPath(resolvedPath: string): Promise<void> {
+async function hardenWritablePath(
+  resolvedPath: string,
+  options?: { allowMissing?: boolean },
+): Promise<void> {
   const parent = dirname(resolvedPath);
   await realpath(parent);
-  const fileStat = await lstat(resolvedPath);
+
+  let fileStat;
+  try {
+    fileStat = await lstat(resolvedPath);
+  } catch (err) {
+    if (
+      options?.allowMissing === true &&
+      (err as NodeJS.ErrnoException).code === "ENOENT"
+    ) {
+      return;
+    }
+    throw err;
+  }
+
   if (fileStat.isSymbolicLink()) {
     throw new Error(`Refusing to operate on symlink: ${resolvedPath}`);
   }
+}
+
+async function hardenPath(resolvedPath: string): Promise<void> {
+  await hardenWritablePath(resolvedPath, { allowMissing: false });
 }
 
 async function containsNulBytes(resolvedPath: string): Promise<boolean> {
@@ -315,8 +335,12 @@ async function promptCanonicalSelection(paths: string[]): Promise<string[] | nul
 
 async function runRollback(filePath: string): Promise<number> {
   const resolved = resolve(filePath);
+  PathSchema.parse(resolved);
 
   try {
+    // Parent realpath + symlink refuse; allow missing target so deleted
+    // files can still be recovered from the sidecar.
+    await hardenWritablePath(resolved, { allowMissing: true });
     await restoreFromSidecar(resolved);
     console.log(`restored from ${resolved}.original`);
     return 0;
