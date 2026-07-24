@@ -33,7 +33,13 @@ const CANONICAL_BASENAMES = new Set([
 ]);
 
 function isInteractiveTTY(): boolean {
-  return process.stdin.isTTY === true || process.env.BETTER_TOKEN_TEST_TTY === "1";
+  if (process.stdin.isTTY === true) {
+    return true;
+  }
+  const testHook = process.env.BETTER_TOKEN_TEST_TTY === "1";
+  const inTest =
+    process.env.VITEST !== undefined || process.env.NODE_ENV === "test";
+  return testHook && inTest;
 }
 
 function countTokens(text: string): number {
