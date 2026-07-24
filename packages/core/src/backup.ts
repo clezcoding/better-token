@@ -1,5 +1,6 @@
 import {
   access,
+  lstat,
   readFile,
   writeFile,
   unlink,
@@ -24,12 +25,28 @@ export function sidecarPathFor(path: string): string {
   return `${path}.original`;
 }
 
+async function assertNotSymlink(filePath: string): Promise<void> {
+  let stats;
+  try {
+    stats = await lstat(filePath);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    throw err;
+  }
+  if (stats.isSymbolicLink()) {
+    throw new Error(`Refusing to operate on symlink: ${filePath}`);
+  }
+}
+
 async function resolveSafeParentDir(filePath: string): Promise<string> {
   const parent = dirname(filePath);
   return realpath(parent);
 }
 
 async function readFileWithCap(path: string): Promise<string> {
+  await assertNotSymlink(path);
   const stats = await stat(path);
   if (stats.size > MAX_FILE_SIZE) {
     throw new Error(`File exceeds maximum size of ${MAX_FILE_SIZE} bytes`);
@@ -47,6 +64,7 @@ async function sidecarExists(path: string): Promise<boolean> {
 }
 
 export async function atomicWriteFile(targetPath: string, content: string): Promise<void> {
+  await assertNotSymlink(targetPath);
   const parent = await resolveSafeParentDir(targetPath);
   const tempName = `.${basename(targetPath)}.${randomBytes(8).toString("hex")}.tmp`;
   const tempPath = join(parent, tempName);
@@ -69,6 +87,8 @@ export async function createSidecarIfMissing(
   content?: string,
 ): Promise<boolean> {
   const sidecar = sidecarPathFor(path);
+  await assertNotSymlink(path);
+  await assertNotSymlink(sidecar);
   const bytes = content ?? (await readFileWithCap(path));
   try {
     await resolveSafeParentDir(path);

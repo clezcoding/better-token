@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import { open, readFile, stat } from "node:fs/promises";
+import { lstat, open, readFile, realpath, stat } from "node:fs/promises";
 import { createInterface } from "node:readline";
 import { dirname, resolve, basename } from "node:path";
-import { realpath } from "node:fs/promises";
 import { Command } from "commander";
 import { encode } from "bpe-lite";
 import { z } from "zod";
@@ -95,6 +94,10 @@ function isCanonicalPath(resolvedPath: string): boolean {
 async function hardenPath(resolvedPath: string): Promise<void> {
   const parent = dirname(resolvedPath);
   await realpath(parent);
+  const fileStat = await lstat(resolvedPath);
+  if (fileStat.isSymbolicLink()) {
+    throw new Error(`Refusing to operate on symlink: ${resolvedPath}`);
+  }
 }
 
 async function containsNulBytes(resolvedPath: string): Promise<boolean> {
