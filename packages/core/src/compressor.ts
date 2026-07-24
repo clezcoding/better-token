@@ -343,7 +343,7 @@ export async function compressFile(
     };
   }
 
-  await createSidecarIfMissing(path);
+  await createSidecarIfMissing(path, original);
   await atomicWriteFile(path, compressed);
 
   return {
