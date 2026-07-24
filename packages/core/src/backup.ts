@@ -56,8 +56,13 @@ export async function readFileWithCap(path: string): Promise<string> {
 }
 
 async function sidecarExists(path: string): Promise<boolean> {
+  const sidecar = sidecarPathFor(path);
   try {
-    await access(sidecarPathFor(path), constants.F_OK);
+    const stats = await lstat(sidecar);
+    // Symlink sidecars are not usable backups — do not follow them.
+    if (stats.isSymbolicLink()) {
+      return false;
+    }
     return true;
   } catch {
     return false;
