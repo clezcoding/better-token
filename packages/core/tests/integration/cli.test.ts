@@ -245,6 +245,12 @@ describe("CLI integration", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
+  it("rollback rejects unknown options like --mode", async () => {
+    const result = await runCli(["rollback", fixturePath, "--mode", "safe"]);
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toMatch(/unknown option|error/i);
+  });
+
   it("atomic write: no temp files left on validator failure", async () => {
     const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
     const testPath = join(dir, "atomic-fail.md");
