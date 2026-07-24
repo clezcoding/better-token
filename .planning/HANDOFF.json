@@ -1,0 +1,104 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-07-24T06:33:59.398Z",
+  "phase": "2",
+  "phase_name": "MCP Shrink Proxy",
+  "phase_dir": null,
+  "expected_phase_dir": ".planning/phases/02-mcp-shrink-proxy",
+  "plan": null,
+  "task": null,
+  "total_tasks": 0,
+  "status": "paused",
+  "completed_tasks": [
+    {
+      "id": "session-cr",
+      "name": "Phase 01 code review + fix --all",
+      "status": "done",
+      "commit": "79f2a60"
+    },
+    {
+      "id": "session-sec",
+      "name": "Phase 01 secure-phase (01-SECURITY.md)",
+      "status": "done",
+      "commit": "243f510"
+    },
+    {
+      "id": "01-01",
+      "name": "Walking skeleton / dry-run CLI",
+      "status": "done"
+    },
+    {
+      "id": "01-02",
+      "name": "Write path + sidecar + rollback",
+      "status": "done"
+    },
+    {
+      "id": "01-03",
+      "name": "Modes + interactive + validate",
+      "status": "done"
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": "02-plan",
+      "name": "Create Phase 02 plans (/gsd-plan-phase 2)",
+      "status": "not_started"
+    },
+    {
+      "id": "01-validate",
+      "name": "Optional: /gsd-validate-phase 1 (VALIDATION.md still draft, nyquist_compliant: false)",
+      "status": "not_started"
+    },
+    {
+      "id": "01-wr04-smoke",
+      "name": "Human smoke-check WR-04 rollback path hardening",
+      "status": "not_started"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "Phase 2 directory does not exist yet — must /gsd-plan-phase 2 before execute",
+      "type": "technical",
+      "workaround": null
+    },
+    {
+      "description": "Phase 2 needs research into stdio JSON-RPC stream buffering (STATE blockers)",
+      "type": "technical",
+      "workaround": "Cover during /gsd-plan-phase 2 research"
+    }
+  ],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {
+      "action": "Smoke-test rollback after WR-04 path hardening",
+      "context": "Code-review fix WR-04 marked requires human verification",
+      "blocking": false
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "L1 = deterministic heuristics; validator hard gate; .original sidecar",
+      "rationale": "Project init / Phase 01 CONTEXT",
+      "phase": "01"
+    },
+    {
+      "decision": "CR-01 section-first carve-outs; CR-02 atomic sidecar wx",
+      "rationale": "Code review critical fixes applied and tested (66/66)",
+      "phase": "01"
+    },
+    {
+      "decision": "T-01-06 and T-01-10 accepted risks in 01-SECURITY.md",
+      "rationale": "Offline engine; validate-without-sidecar is local-only",
+      "phase": "01"
+    }
+  ],
+  "uncommitted_files": [
+    ".planning/config.json",
+    ".agents/",
+    ".cursor/",
+    "Tokenwise-PRD.md",
+    "skills-lock.json"
+  ],
+  "next_action": "Run /gsd-plan-phase 2 to research + plan MCP Shrink Proxy (create .planning/phases/02-mcp-shrink-proxy)",
+  "context_notes": "Session finished Phase 01 quality gates: code-review --fix --all (11/11 fixed), secure-phase (threats_open:0). /gsd-execute-phase 1 was no-op (all summaries present). STATE already points at Phase 2 planning. Do not re-execute Phase 01. Optional leftovers: validate-phase 1, WR-04 human smoke."
+}
