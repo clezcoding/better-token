@@ -1,10 +1,13 @@
 import { spawn } from "node:child_process";
-import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
+import { readFile, writeFile, mkdtemp, rm, access, readdir } from "node:fs/promises";
 import { resolve, dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { describe, it, expect } from "vitest";
+import { constants } from "node:fs";
+import { describe, it, expect, vi } from "vitest";
 import { validate } from "../../src/validator.js";
+import * as validatorModule from "../../src/validator.js";
+import { compressMarkdown } from "../../src/compressor.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixturePath = resolve(__dirname, "../fixtures/sample-claude.md");
@@ -66,15 +69,193 @@ describe("CLI integration", () => {
     expect(stdout).toMatch(/estimated delta: -[1-9]\d*/);
   });
 
-  it("SAFE-01: validator failure exits non-zero", async () => {
+  it("SAFE-01: validator failure exits non-zero on write path", async () => {
     const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
     const corruptPath = join(dir, "corrupt.md");
-    const original = "# Title\n\n```ts\nconst a = 1;\n```";
-    const corrupted = "# Title\n\n```ts\nconst a = 2;\n```";
+    const original = "# Title\n\nPlease make sure to read this.\n\n```ts\nconst a = 1;\n```";
     await writeFile(corruptPath, original, "utf-8");
 
-    const validation = validate(original, corrupted);
-    expect(validation.ok).toBe(false);
+    const spy = vi.spyOn(validatorModule, "validate").mockReturnValue({
+      ok: false,
+      errors: ["Code blocks not preserved exactly"],
+      warnings: [],
+    });
+
+    try {
+      const { code, stdout } = await runCli(["compress", corruptPath]);
+      expect(code).not.toBe(0);
+      expect(stdout).toContain("validator: fail");
+
+      const after = await readFile(corruptPath, "utf-8");
+      expect(after).toBe(original);
+
+      await expect(access(`${corruptPath}.original`, constants.F_OK)).rejects.toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("COMP-04: re-run on already-compressed file is no-op", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "sample.md");
+    const original = await readFile(fixturePath, "utf-8");
+    await writeFile(testPath, original, "utf-8");
+
+    const first = await runCli(["compress", testPath]);
+    expect(first.code).toBe(0);
+
+    const afterFirst = await readFile(testPath, "utf-8");
+    const second = await runCli(["compress", testPath]);
+    expect(second.code).toBe(0);
+    expect(second.stdout).toContain("already compressed — no changes");
+
+    const afterSecond = await readFile(testPath, "utf-8");
+    expect(afterSecond).toBe(afterFirst);
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("COMP-05: compress creates sidecar; rollback restores", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "sample.md");
+    const original = await readFile(fixturePath, "utf-8");
+    await writeFile(testPath, original, "utf-8");
+
+    const compressResult = await runCli(["compress", testPath]);
+    expect(compressResult.code).toBe(0);
+
+    const sidecarPath = `${testPath}.original`;
+    const sidecar = await readFile(sidecarPath, "utf-8");
+    expect(sidecar).toBe(original);
+
+    const compressed = await readFile(testPath, "utf-8");
+    expect(compressed).not.toBe(original);
+
+    const rollbackResult = await runCli(["rollback", testPath]);
+    expect(rollbackResult.code).toBe(0);
+    expect(rollbackResult.stdout).toContain(`restored from ${testPath}.original`);
+
+    const restored = await readFile(testPath, "utf-8");
+    expect(restored).toBe(original);
+    await expect(access(sidecarPath, constants.F_OK)).rejects.toThrow();
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("COMP-05: rollback with no sidecar exits non-zero", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "no-backup.md");
+    await writeFile(testPath, "content", "utf-8");
+
+    const result = await runCli(["rollback", testPath]);
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain(`no backup found for ${testPath}`);
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("COMP-05: rollback recovers deleted target from sidecar", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "recover.md");
+    const original = await readFile(fixturePath, "utf-8");
+    await writeFile(testPath, original, "utf-8");
+
+    await runCli(["compress", testPath]);
+    await rm(testPath);
+
+    const rollbackResult = await runCli(["rollback", testPath]);
+    expect(rollbackResult.code).toBe(0);
+
+    const restored = await readFile(testPath, "utf-8");
+    expect(restored).toBe(original);
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("COMP-05: after rollback, compress creates fresh sidecar", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "fresh-sidecar.md");
+    const original = await readFile(fixturePath, "utf-8");
+    await writeFile(testPath, original, "utf-8");
+
+    await runCli(["compress", testPath]);
+    await runCli(["rollback", testPath]);
+
+    const recompress = await runCli(["compress", testPath]);
+    expect(recompress.code).toBe(0);
+
+    const sidecar = await readFile(`${testPath}.original`, "utf-8");
+    expect(sidecar).toBe(original);
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("D-13: mode switch recompresses from sidecar original", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "mode-switch.md");
+    const original = await readFile(fixturePath, "utf-8");
+    await writeFile(testPath, original, "utf-8");
+
+    await runCli(["compress", testPath, "--mode", "balanced"]);
+    await runCli(["compress", testPath, "--mode", "safe"]);
+
+    const afterSafe = await readFile(testPath, "utf-8");
+    const expectedFromOriginal = compressMarkdown(original, "safe");
+    expect(afterSafe).toBe(expectedFromOriginal);
+
+    const stackedWrong = compressMarkdown(
+      compressMarkdown(original, "balanced"),
+      "safe",
+    );
+    expect(afterSafe).not.toBe(stackedWrong);
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("D-15: --force is rejected as unknown option", async () => {
+    const result = await runCli(["compress", fixturePath, "--force"]);
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toMatch(/unknown option|error/i);
+  });
+
+  it("D-06: dry-run does not create sidecar", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "dry-run.md");
+    const original = await readFile(fixturePath, "utf-8");
+    await writeFile(testPath, original, "utf-8");
+
+    await runCli(["compress", testPath, "--dry-run"]);
+    await expect(access(`${testPath}.original`, constants.F_OK)).rejects.toThrow();
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("no in-file idempotency marker in compressed output", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "no-marker.md");
+    const original = await readFile(fixturePath, "utf-8");
+    await writeFile(testPath, original, "utf-8");
+
+    await runCli(["compress", testPath]);
+    const compressed = await readFile(testPath, "utf-8");
+    expect(compressed).not.toContain("<!-- compressed");
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("atomic write: no temp files left on validator failure", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
+    const testPath = join(dir, "atomic-fail.md");
+    const original = "# Fail\n\nPlease make sure to check.\n\n```js\nx=1\n```";
+    await writeFile(testPath, original, "utf-8");
+
+    await runCli(["compress", testPath]);
+
+    const entries = await readdir(dir);
+    const tempFiles = entries.filter((e) => e.includes(".tmp"));
+    expect(tempFiles).toHaveLength(0);
 
     await rm(dir, { recursive: true, force: true });
   });
