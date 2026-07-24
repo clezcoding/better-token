@@ -11,6 +11,19 @@ export interface ValidationResult {
 }
 
 export { tokenizeMarkdown, detokenizeMarkdown, extractProtectedRegions } from "./tokenizer.js";
-export { compressMarkdown, compressProse, compressMarkdownWithValidation } from "./compressor.js";
+export {
+  compressMarkdown,
+  compressProse,
+  compressMarkdownWithValidation,
+  compressFile,
+  type CompressFileResult,
+} from "./compressor.js";
 export { validate } from "./validator.js";
 export { extractCarveOuts, CARVEOUT_CATEGORIES } from "./carveouts.js";
+export {
+  sidecarPathFor,
+  createSidecarIfMissing,
+  readSidecar,
+  restoreFromSidecar,
+  MissingSidecarError,
+} from "./backup.js";

@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 import { Command } from "commander";
 import { encode } from "bpe-lite";
 import { z } from "zod";
-import { compressMarkdownWithValidation } from "./compressor.js";
+import { compressFile, compressMarkdownWithValidation } from "./compressor.js";
+import { MissingSidecarError, restoreFromSidecar } from "./backup.js";
 import type { CompressionMode } from "./index.js";
 
 const OptionsSchema = z.object({
@@ -12,6 +13,8 @@ const OptionsSchema = z.object({
   dryRun: z.boolean(),
   diff: z.boolean(),
 });
+
+const PathSchema = z.string().min(1);
 
 function countTokens(text: string): number {
   return encode(text).length;
@@ -65,41 +68,85 @@ async function runCompress(
   options: z.infer<typeof OptionsSchema>,
 ): Promise<number> {
   const resolved = resolve(filePath);
-  const original = await readFile(resolved, "utf-8");
-  const { content: compressed, validation } = compressMarkdownWithValidation(
-    original,
-    options.mode,
-  );
 
-  const before = countTokens(original);
-  const after = countTokens(compressed);
+  if (options.dryRun) {
+    const original = await readFile(resolved, "utf-8");
+    const { content: compressed, validation } = compressMarkdownWithValidation(
+      original,
+      options.mode,
+    );
+
+    const before = countTokens(original);
+    const after = countTokens(compressed);
+
+    console.log(
+      formatStatsLine({
+        before,
+        after,
+        mode: options.mode,
+        validation,
+      }),
+    );
+
+    if (options.diff) {
+      console.log(unifiedDiff(original, compressed));
+    }
+
+    if (!validation.ok) {
+      for (const error of validation.errors) {
+        console.error(error);
+      }
+      return 1;
+    }
+
+    return 0;
+  }
+
+  const result = await compressFile(resolved, {
+    mode: options.mode,
+    dryRun: false,
+  });
 
   console.log(
     formatStatsLine({
-      before,
-      after,
+      before: result.before,
+      after: result.after,
       mode: options.mode,
-      validation,
+      validation: { ok: result.ok && result.reason !== "validator-failed" },
     }),
   );
 
-  if (options.diff) {
-    console.log(unifiedDiff(original, compressed));
-  }
-
-  if (!validation.ok) {
-    for (const error of validation.errors) {
-      console.error(error);
+  if (!result.ok) {
+    if (result.errors) {
+      for (const error of result.errors) {
+        console.error(error);
+      }
     }
     return 1;
   }
 
-  if (!options.dryRun) {
-    console.error("Write mode not implemented in walking skeleton — use --dry-run");
-    return 1;
+  if (result.noop) {
+    console.log("already compressed — no changes");
+    return 0;
   }
 
   return 0;
+}
+
+async function runRollback(filePath: string): Promise<number> {
+  const resolved = resolve(filePath);
+
+  try {
+    await restoreFromSidecar(resolved);
+    console.log(`restored from ${resolved}.original`);
+    return 0;
+  } catch (err) {
+    if (err instanceof MissingSidecarError) {
+      console.error(`no backup found for ${resolved}`);
+      return 1;
+    }
+    throw err;
+  }
 }
 
 const cli = new Command();
@@ -128,6 +175,15 @@ cli
     });
 
     const exitCode = await runCompress(path, parsed);
+    process.exit(exitCode);
+  });
+
+cli
+  .command("rollback <path>")
+  .description("Restore file from .original sidecar backup")
+  .action(async (path: string) => {
+    const parsed = PathSchema.parse(path);
+    const exitCode = await runRollback(parsed);
     process.exit(exitCode);
   });
 

@@ -5,9 +5,9 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { constants } from "node:fs";
 import { describe, it, expect, vi } from "vitest";
-import { validate } from "../../src/validator.js";
 import * as validatorModule from "../../src/validator.js";
 import { compressMarkdown } from "../../src/compressor.js";
+import { compressFile } from "../../src/compressor.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixturePath = resolve(__dirname, "../fixtures/sample-claude.md");
@@ -69,7 +69,7 @@ describe("CLI integration", () => {
     expect(stdout).toMatch(/estimated delta: -[1-9]\d*/);
   });
 
-  it("SAFE-01: validator failure exits non-zero on write path", async () => {
+  it("SAFE-01: validator failure on compressFile keeps original", async () => {
     const dir = await mkdtemp(join(tmpdir(), "better-token-test-"));
     const corruptPath = join(dir, "corrupt.md");
     const original = "# Title\n\nPlease make sure to read this.\n\n```ts\nconst a = 1;\n```";
@@ -82,9 +82,9 @@ describe("CLI integration", () => {
     });
 
     try {
-      const { code, stdout } = await runCli(["compress", corruptPath]);
-      expect(code).not.toBe(0);
-      expect(stdout).toContain("validator: fail");
+      const result = await compressFile(corruptPath, { mode: "balanced" });
+      expect(result.ok).toBe(false);
+      expect(result.reason).toBe("validator-failed");
 
       const after = await readFile(corruptPath, "utf-8");
       expect(after).toBe(original);
