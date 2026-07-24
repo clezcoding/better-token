@@ -382,7 +382,9 @@ describe("CLI integration", () => {
 
     const validateResult = await runCli(["validate", testPath]);
     expect(validateResult.code).toBe(0);
-    expect(validateResult.stdout).toContain("no original to compare; internal check passed");
+    expect(validateResult.stdout).toContain(
+      "no original sidecar to compare; nothing compared — self-check only (internal check passed)",
+    );
 
     await rm(dir, { recursive: true, force: true });
   });

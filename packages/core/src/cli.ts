@@ -283,7 +283,9 @@ async function runValidate(filePath: string): Promise<number> {
     if (hasSidecar) {
       console.log("validator: pass");
     } else {
-      console.log("no original to compare; internal check passed");
+      console.log(
+        "no original sidecar to compare; nothing compared — self-check only (internal check passed)",
+      );
     }
     return 0;
   }
