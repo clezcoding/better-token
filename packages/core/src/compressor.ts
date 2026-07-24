@@ -55,7 +55,8 @@ const BALANCED_FILLERS: RegExp[] = [
   /Actually/gi,
 ];
 
-const PLACEHOLDER_REGEX = /__[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*__/;
+// Nonce suffixes are lowercase hex; allow a-f so aggressive merge preserves tokens.
+const PLACEHOLDER_REGEX = /__[A-Z][A-Za-f0-9]*(?:_[A-Za-f0-9]+)*__/;
 
 function lineHasPlaceholder(line: string): boolean {
   return PLACEHOLDER_REGEX.test(line);
