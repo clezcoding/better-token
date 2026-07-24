@@ -29,20 +29,20 @@ export function validate(original: string, compressed: string): ValidationResult
     errors.push("Code blocks not preserved exactly");
   }
 
-  const origInline = extractInlineCodes(origBody).sort();
-  const compInline = extractInlineCodes(compBody).sort();
+  const origInline = extractInlineCodes(origBody);
+  const compInline = extractInlineCodes(compBody);
   if (JSON.stringify(origInline) !== JSON.stringify(compInline)) {
     errors.push(`Inline code mismatch: orig=${origInline.length}, comp=${compInline.length}`);
   }
 
-  const origUrls = extractUrls(origBody).sort();
-  const compUrls = extractUrls(compBody).sort();
+  const origUrls = extractUrls(origBody);
+  const compUrls = extractUrls(compBody);
   if (JSON.stringify(origUrls) !== JSON.stringify(compUrls)) {
     errors.push(`URL mismatch: lost=${origUrls.filter((u) => !compUrls.includes(u)).join(",")}`);
   }
 
-  const origPaths = extractPaths(origBody).sort();
-  const compPaths = extractPaths(compBody).sort();
+  const origPaths = extractPaths(origBody);
+  const compPaths = extractPaths(compBody);
   if (JSON.stringify(origPaths) !== JSON.stringify(compPaths)) {
     errors.push(`Path mismatch: lost=${origPaths.filter((p) => !compPaths.includes(p)).join(",")}`);
   }
