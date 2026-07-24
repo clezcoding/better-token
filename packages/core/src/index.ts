@@ -16,6 +16,7 @@ export {
   compressProse,
   compressMarkdownWithValidation,
   compressFile,
+  detectCanonicalFiles,
   type CompressFileResult,
 } from "./compressor.js";
 export { validate } from "./validator.js";
