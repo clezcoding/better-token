@@ -1,98 +1,100 @@
 ---
 phase: 01-l1-compression-engine-validator
-fixed_at: 2026-07-24T06:00:30Z
+fixed_at: 2026-07-24T06:20:00Z
 review_path: .planning/phases/01-l1-compression-engine-validator/01-REVIEW.md
 iteration: 1
-findings_in_scope: 10
-fixed: 10
+findings_in_scope: 11
+fixed: 11
 skipped: 0
 status: all_fixed
 ---
 
-# Phase 01: Code Review Fix Report
+# Phase 1: Code Review Fix Report
 
-**Fixed at:** 2026-07-24T06:00:30Z
+**Fixed at:** 2026-07-24T06:20:00Z
 **Source review:** `.planning/phases/01-l1-compression-engine-validator/01-REVIEW.md`
 **Iteration:** 1
 
 **Summary:**
-- Findings in scope: 10
-- Fixed: 10
+- Findings in scope: 11
+- Fixed: 11
 - Skipped: 0
 
 ## Fixed Issues
 
-### CR-01: Sidecar never-overwrite is TOCTOU (no exclusive create)
+### CR-01: `extractCarveOuts` double-wraps section bodies (broken round-trip)
+
+**Files modified:** `packages/core/src/carveouts.ts`, `packages/core/tests/unit/carveouts.test.ts`, `packages/core/tests/fixtures/sample-claude.md`
+**Commit:** 5958728 (follow-up fixture: 373795a)
+**Applied fix:** Run section-body protection before line/regex carve-outs; skip lines that already look like placeholders inside `protectSectionBody`. Added round-trip unit test for `## Security` / `## Pull Request` bodies. Moved irreversible/step fixture lines under `## Workflow` so section-first protection does not absorb all five categories into `security`.
+
+### CR-02: Sidecar create is not atomic — corrupt `.original` can be permanently pinned
 
 **Files modified:** `packages/core/src/backup.ts`
-**Commit:** `bed0bb0`
-**Applied fix:** `createSidecarIfMissing` now uses exclusive `writeFile` with `flag: "wx"` and treats `EEXIST` as already-backed-up (`false`). Optional `content` parameter added for in-memory original.
+**Commit:** d0d06c4
+**Applied fix:** Create sidecar with exclusive `open(..., "wx")`, write full content to the fd, and `unlink` the sidecar if the write fails partway so partial backups are never left as immutable truth.
 
-### CR-02: Sidecar re-reads target instead of backing up known original
+### WR-01: Filler removal leaves leading / doubled whitespace
 
 **Files modified:** `packages/core/src/compressor.ts`
-**Commit:** `7f8cced`
-**Applied fix:** `compressFile` passes the already-loaded `original` into `createSidecarIfMissing(path, original)` so the sidecar never re-reads disk for the first backup.
+**Commit:** 7e2b106
+**Applied fix:** `normalizeWhitespace` now uses `.trim()` (start + end) after collapsing internal runs.
 
-### CR-03: Validator reorder bypass for URLs, paths, and inline code
+### WR-02: Irreversible carve-out matches substrings (`confirm` inside `confirmation`)
 
-**Files modified:** `packages/core/src/validator.ts`
-**Commit:** `6568b1f`
-**Applied fix:** Removed `.sort()` on inline codes, URLs, and paths — compare positional sequences via `JSON.stringify` like headings/code blocks.
+**Files modified:** `packages/core/src/carveouts.ts`
+**Commit:** c784d67
+**Applied fix:** Added word boundaries around bare irreversible keywords (`\bconfirm\b`, `\birreversible\b`, etc.).
 
-### CR-04: Placeholder collision corrupts content; validator may still pass
+### WR-03: `extractInlineCodes` still scans fenced code contents
 
-**Files modified:** `packages/core/src/tokenizer.ts`, `packages/core/src/carveouts.ts`, `packages/core/src/compressor.ts`, `packages/core/tests/unit/tokenizer.test.ts`
-**Commit:** `7f04e7c` (+ follow-up `b3fce0c`)
-**Applied fix:** Per-run 16-hex nonce in all placeholders; longest-first exact-match detokenize; tokenize→detokenize identity gate before accepting compression. Follow-up widened `PLACEHOLDER_REGEX` to match lowercase nonce hex so aggressive merge still sees tokens.
+**Files modified:** `packages/core/src/tokenizer.ts`
+**Commit:** 33f1768
+**Applied fix:** Strip full fenced regions via `extractCodeBlocks` offset walk before matching inline code.
+
+### WR-04: `rollback` skips path hardening used by compress/validate
+
+**Files modified:** `packages/core/src/cli.ts`
+**Commit:** 988063d
 **Status:** fixed: requires human verification
+**Applied fix:** Added `hardenWritablePath` (parent `realpath` + symlink refuse, optional `allowMissing`); `runRollback` uses it with `allowMissing: true` so deleted targets can still restore. Logic path change — confirm restore-of-missing-target still works in practice.
 
-### WR-01: Symlink hardening only realpaths the parent directory
+### WR-05: `hasSidecar` treats symlink sidecars as present, then read throws
 
-**Files modified:** `packages/core/src/backup.ts`, `packages/core/src/cli.ts`
-**Commit:** `985f284`
-**Applied fix:** `lstat` + reject symbolic links in CLI `hardenPath` and backup read/write/sidecar paths.
+**Files modified:** `packages/core/src/backup.ts`
+**Commit:** 0728e54
+**Applied fix:** `sidecarExists` now uses `lstat` and returns `false` when the sidecar path is a symlink (does not follow).
 
-### WR-02: 10 MiB cap applied inconsistently
+### WR-06: `WARNING:` lines classified as `error` carve-outs, not `security`
 
-**Files modified:** `packages/core/src/backup.ts`, `packages/core/src/compressor.ts`, `packages/core/src/cli.ts`
-**Commit:** `fe33c51`
-**Applied fix:** Exported `readFileWithCap` and used it for compressFile, CLI dry-run, and validate reads (including sidecar).
+**Files modified:** `packages/core/src/carveouts.ts`
+**Commit:** 1cb8206
+**Applied fix:** Removed `Warning` from `ERROR_LINE_REGEX` so `SECURITY_LINE_REGEX` owns `WARNING` / `WARNING:` lines.
 
-### WR-03: `BETTER_TOKEN_TEST_TTY` changes production CLI control flow
+### IN-01: `validate` without sidecar always reports pass
+
+**Files modified:** `packages/core/src/cli.ts`, `packages/core/tests/integration/cli.test.ts`
+**Commit:** e13470d
+**Applied fix:** Clarified stdout that nothing was compared (self-check only); kept exit code 0. Updated integration test expectation.
+
+### IN-02: `--diff` output is not a real unified diff
 
 **Files modified:** `packages/core/src/cli.ts`
-**Commit:** `a95eb67`
-**Applied fix:** Test TTY hook only active when `VITEST` is set or `NODE_ENV=test`.
+**Commit:** b57ba3e
+**Applied fix:** Renamed helper to `lineAlignmentPreview`, documented as not unified/LCS; updated Commander `--diff` help text.
 
-### WR-04: Invalid `--mode` throws unhandled Zod error
+### IN-03: Canonical basename set duplicated
 
-**Files modified:** `packages/core/src/cli.ts`
-**Commit:** `a65d15a`
-**Applied fix:** `OptionsSchema.safeParse` with clear stderr message and `process.exit(1)`.
-
-### WR-05: Identical code fences only first occurrence tokenized
-
-**Files modified:** `packages/core/src/tokenizer.ts`
-**Commit:** `0a0e9ff`
-**Applied fix:** Offset-walking replacement so each identical fence gets its own placeholder.
-
-### WR-06: Unclosed code fences are not protected
-
-**Files modified:** `packages/core/src/tokenizer.ts`
-**Commit:** `e36b62f`
-**Applied fix:** Unclosed fences treated as protected regions through EOF (fail closed).
+**Files modified:** `packages/core/src/compressor.ts`, `packages/core/src/cli.ts`, `packages/core/src/index.ts`
+**Commit:** 4cb4e1a
+**Applied fix:** Exported `CANONICAL_BASENAMES` from `compressor.ts` (and re-exported from `index.ts`); CLI imports the shared set.
 
 ## Skipped Issues
 
 None — all findings were fixed.
 
-## Test results
-
-`npm test -- --run` in `packages/core`: **65/65 passed** (6 files).
-
 ---
 
-_Fixed: 2026-07-24T06:00:30Z_
+_Fixed: 2026-07-24T06:20:00Z_
 _Fixer: Claude (gsd-code-fixer)_
 _Iteration: 1_
