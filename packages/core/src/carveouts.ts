@@ -63,6 +63,15 @@ function protectSectionBody(
       i += 1;
       while (i < lines.length && !/^(#{1,6})\s/.test(lines[i] ?? "")) {
         const bodyLine = lines[i] ?? "";
+        // Skip lines already protected — re-wrapping breaks single-pass detokenize.
+        if (
+          /^__CARVEOUT_[A-Z0-9_]+__$/.test(bodyLine) ||
+          /^__[A-Z][A-Za-f0-9]*(?:_[A-Za-f0-9]+)*__$/.test(bodyLine)
+        ) {
+          output.push(bodyLine);
+          i += 1;
+          continue;
+        }
         const placeholder = carveoutPlaceholder(category, counters[category], nonce);
         counters[category] += 1;
         tokens[placeholder] = bodyLine;
@@ -109,19 +118,7 @@ export function extractCarveOuts(
 
   let text = body;
 
-  for (const { category, regex } of CATEGORY_PATTERNS) {
-    regex.lastIndex = 0;
-    text = protectRegexMatches(text, regex, category, tokens, counters, nonce);
-  }
-
-  text = protectSectionBody(
-    text,
-    /^##\s+(Pull Request|PR)\s*$/i,
-    "commit",
-    tokens,
-    counters,
-    nonce,
-  );
+  // Section bodies first so line/regex carve-outs do not nest inside them.
   text = protectSectionBody(
     text,
     /^##\s+(Security|Security Warning|Warnung)\s*$/i,
@@ -130,6 +127,19 @@ export function extractCarveOuts(
     counters,
     nonce,
   );
+  text = protectSectionBody(
+    text,
+    /^##\s+(Pull Request|PR)\s*$/i,
+    "commit",
+    tokens,
+    counters,
+    nonce,
+  );
+
+  for (const { category, regex } of CATEGORY_PATTERNS) {
+    regex.lastIndex = 0;
+    text = protectRegexMatches(text, regex, category, tokens, counters, nonce);
+  }
 
   return { text, tokens };
 }

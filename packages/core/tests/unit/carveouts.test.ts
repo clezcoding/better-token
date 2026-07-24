@@ -46,4 +46,30 @@ describe("Carve-outs", () => {
       expect(matches.length).toBeGreaterThan(0);
     }
   });
+
+  it("round-trips docs with Security and Pull Request section bodies", () => {
+    const body = [
+      "# Title",
+      "",
+      "## Security",
+      "Never leak credentials in logs.",
+      "Rotate keys after exposure.",
+      "",
+      "## Pull Request",
+      "Link the tracking issue.",
+      "Request review from OWNERS.",
+      "",
+      "Normal prose after sections.",
+    ].join("\n");
+
+    const { text, tokens } = extractCarveOuts(body);
+    expect(detokenizeMarkdown(text, tokens)).toBe(body);
+
+    const securityValues = Object.entries(tokens)
+      .filter(([key]) => key.startsWith("__CARVEOUT_SECURITY_"))
+      .map(([, value]) => value);
+    expect(securityValues).toContain("Never leak credentials in logs.");
+    expect(securityValues).toContain("Rotate keys after exposure.");
+    expect(securityValues.some((value) => /__CARVEOUT_/.test(value))).toBe(false);
+  });
 });
