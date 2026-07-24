@@ -14,7 +14,7 @@ A developer can run `better-token compress <rule-file.md> --dry-run` and see a r
 | Language | TypeScript ^5.5.0 | Compile-time safety across core engine, CLI, and later MCP proxy / adapters. |
 | Runtime | Node.js ^20.11.0 LTS | Standard runtime for IDE CLIs and MCP servers; ESM + native fetch. |
 | Repository shape | npm workspaces monorepo, `packages/core` first | Allows `packages/shrink-mcp`, `packages/stats`, `packages/compiler` (later phases) to import `packages/core` without bundling unnecessary deps. |
-| Markdown parsing | `unified` ^11 + `remark-parse` ^11 + `remark-stringify` ^11 | AST-aware parsing is the only way to guarantee 0% substance loss on protected regions (regex-only minifiers are fragile). |
+| Markdown parsing | Line-based regex protected-token pattern (ported from caveman-compress `compress.py`/`validate.py` prior-art) | CONTEXT.md "Claude's Discretion: Parser implementation (regex protected-token vs remark/unified AST) — research/planner choose for safety". The protected-token regex isolates syntax regions as immutable placeholders before any prose compression, delivering the same 0%-substance-loss guarantee as AST parsing without the serialization drift risk of a remark round-trip. `unified`/`remark-parse`/`remark-stringify` are NOT Phase 1 dependencies. |
 | Token estimation | `bpe-lite` ^0.5.2 (offline, multi-provider) | Pure JS, no WASM, works in restricted IDE plugin environments; supports OpenAI/Anthropic/Gemini vocabularies. Phase 1 figures labeled **estimated** per D-09. |
 | CLI parsing | `commander` ^15 + `zod` ^4 for option schema | Zero-dependency, fast CLI; zod validates options and (later) canonical profile. |
 | Build | `esbuild` ^0.25 (dev dep) | Single-file bundle for <50ms CLI startup. |

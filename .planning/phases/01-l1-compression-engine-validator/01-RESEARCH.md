@@ -347,12 +347,13 @@ export function compressProseBalanced(prose: string): string {
 |---|-------|---------|---------------|
 | A1 | `bpe-lite` token estimation is accurate enough for Phase 1 stats | Standard Stack | Low risk. Token figures are explicitly labeled as "estimated" in Phase 1, and exact metrics will be introduced in Phase 4. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **How should frontmatter in `.cursorrules` or `.mdc` rule files be handled during compression?**
+1. **How should frontmatter in `.cursorrules` or `.mdc` rule files be handled during compression?** (RESOLVED)
    - *What we know:* Frontmatter contains YAML configuration that Cursor's matching compiler reads.
    - *What's unclear:* If frontmatter is compressed as prose, Cursor's compiler will break.
    - *Recommendation:* The tokenizer must treat frontmatter as a protected region and preserve it byte-for-byte.
+   - **Resolution (2026-07-24):** Frontmatter is a protected byte-exact token. `tokenizeMarkdown` splits the YAML frontmatter block (delimited by `---` lines at file start) from the body first, protects the entire block under a single `__FRONTMATTER_0__` placeholder, and `detokenizeMarkdown` restores it verbatim. The validator asserts frontmatter byte-equality between original and compressed. Implemented in Plan 01-01 Task 3; asserted by `tokenizer.test.ts` (frontmatter round-trip) and `validator.test.ts` (frontmatter byte-equal).
 
 ## Environment Availability
 
