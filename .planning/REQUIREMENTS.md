@@ -12,8 +12,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **COMP-01**: User can compress rule/memory files (`CLAUDE.md`, `.cursorrules`, `AGENTS.md`, `GEMINI.md`, and equivalents) with a deterministic heuristic engine (no LLM rewrite)
 - [ ] **COMP-02**: User can select L1 aggression mode `safe`, `balanced`, or `aggressive` (default `balanced`); validator remains on in every mode
 - [x] **COMP-03**: User can run compression with `--dry-run` to see token delta without writing files
-- [ ] **COMP-04**: Repeated compression is idempotent (already-compressed files detected; no further change)
-- [ ] **COMP-05**: Original file is saved as `.original` (or equivalent) and user can roll back to it
+- [x] **COMP-04**: Repeated compression is idempotent (already-compressed files detected; no further change)
+- [x] **COMP-05**: Original file is saved as `.original` (or equivalent) and user can roll back to it
 
 ### Safety & Validation
 
@@ -94,8 +94,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-01 | Phase 1 | Complete |
 | COMP-02 | Phase 1 | Pending |
 | COMP-03 | Phase 1 | Complete |
-| COMP-04 | Phase 1 | Pending |
-| COMP-05 | Phase 1 | Pending |
+| COMP-04 | Phase 1 | Complete |
+| COMP-05 | Phase 1 | Complete |
 | SAFE-01 | Phase 1 | Complete |
 | SAFE-02 | Phase 1 | Complete |
 | SAFE-03 | Phase 1 | Complete |
