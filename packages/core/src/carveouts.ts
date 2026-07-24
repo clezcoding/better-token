@@ -35,12 +35,22 @@ const CATEGORY_PATTERNS: Array<{
   { category: "step", regex: ORDERED_LIST_REGEX },
 ];
 
+function carveoutPlaceholder(
+  category: CarveoutCategory,
+  index: number,
+  nonce?: string,
+): string {
+  const base = `__CARVEOUT_${category.toUpperCase()}_${index}`;
+  return nonce ? `${base}_${nonce}__` : `${base}__`;
+}
+
 function protectSectionBody(
   text: string,
   headingRegex: RegExp,
   category: CarveoutCategory,
   tokens: TokenMap,
   counters: Record<CarveoutCategory, number>,
+  nonce?: string,
 ): string {
   const lines = text.split("\n");
   const output: string[] = [];
@@ -53,7 +63,7 @@ function protectSectionBody(
       i += 1;
       while (i < lines.length && !/^(#{1,6})\s/.test(lines[i] ?? "")) {
         const bodyLine = lines[i] ?? "";
-        const placeholder = `__CARVEOUT_${category.toUpperCase()}_${counters[category]}__`;
+        const placeholder = carveoutPlaceholder(category, counters[category], nonce);
         counters[category] += 1;
         tokens[placeholder] = bodyLine;
         output.push(placeholder);
@@ -74,16 +84,20 @@ function protectRegexMatches(
   category: CarveoutCategory,
   tokens: TokenMap,
   counters: Record<CarveoutCategory, number>,
+  nonce?: string,
 ): string {
   return text.replace(regex, (match) => {
-    const placeholder = `__CARVEOUT_${category.toUpperCase()}_${counters[category]}__`;
+    const placeholder = carveoutPlaceholder(category, counters[category], nonce);
     counters[category] += 1;
     tokens[placeholder] = match;
     return placeholder;
   });
 }
 
-export function extractCarveOuts(body: string): { text: string; tokens: TokenMap } {
+export function extractCarveOuts(
+  body: string,
+  nonce?: string,
+): { text: string; tokens: TokenMap } {
   const tokens: TokenMap = {};
   const counters: Record<CarveoutCategory, number> = {
     error: 0,
@@ -97,7 +111,7 @@ export function extractCarveOuts(body: string): { text: string; tokens: TokenMap
 
   for (const { category, regex } of CATEGORY_PATTERNS) {
     regex.lastIndex = 0;
-    text = protectRegexMatches(text, regex, category, tokens, counters);
+    text = protectRegexMatches(text, regex, category, tokens, counters, nonce);
   }
 
   text = protectSectionBody(
@@ -106,6 +120,7 @@ export function extractCarveOuts(body: string): { text: string; tokens: TokenMap
     "commit",
     tokens,
     counters,
+    nonce,
   );
   text = protectSectionBody(
     text,
@@ -113,6 +128,7 @@ export function extractCarveOuts(body: string): { text: string; tokens: TokenMap
     "security",
     tokens,
     counters,
+    nonce,
   );
 
   return { text, tokens };

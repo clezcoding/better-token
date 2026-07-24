@@ -54,7 +54,7 @@ const BALANCED_FILLERS: RegExp[] = [
   /Actually/gi,
 ];
 
-const PLACEHOLDER_REGEX = /__([A-Z_]+_\d+)__/;
+const PLACEHOLDER_REGEX = /__[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*__/;
 
 function lineHasPlaceholder(line: string): boolean {
   return PLACEHOLDER_REGEX.test(line);
@@ -242,6 +242,18 @@ export function compressMarkdownWithValidation(
   mode: CompressionMode,
 ): { content: string; validation: ReturnType<typeof validate> } {
   const tokenized = tokenizeMarkdown(content);
+  const roundTrip = detokenizeMarkdown(tokenized.text, tokenized.tokens);
+  if (roundTrip !== content) {
+    return {
+      content,
+      validation: {
+        ok: false,
+        errors: ["Tokenize/detokenize identity check failed"],
+        warnings: [],
+      },
+    };
+  }
+
   const compressedTokenized = compressProse(tokenized.text, mode);
   const candidate = detokenizeMarkdown(compressedTokenized, tokenized.tokens);
   const validation = validate(content, candidate);

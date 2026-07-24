@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import type { TokenMap } from "./index.js";
 import { extractCarveOuts } from "./carveouts.js";
 
@@ -8,6 +9,14 @@ const URL_REGEX = /https?:\/\/[^\s)]+/g;
 const INLINE_CODE_REGEX = /`[^`\n]+`/g;
 const PATH_REGEX =
   /(?:\.\/|\.\.\/|\/|[A-Za-z]:\\)[\w\-/\\.]+\b|[\w\-.]+[/\\][\w\-/\\.]+/g;
+
+function makeNonce(): string {
+  return randomBytes(8).toString("hex");
+}
+
+function makePlaceholder(prefix: string, index: number, nonce: string): string {
+  return `__${prefix}_${index}_${nonce}__`;
+}
 
 export function splitFrontmatter(content: string): { frontmatter: string; body: string } {
   const match = FRONTMATTER_REGEX.exec(content);
@@ -93,20 +102,26 @@ function protectMatches(
   prefix: string,
   tokens: TokenMap,
   counter: { value: number },
+  nonce: string,
 ): string {
   return text.replace(regex, (match) => {
-    const placeholder = `__${prefix}_${counter.value}__`;
+    const placeholder = makePlaceholder(prefix, counter.value, nonce);
     counter.value += 1;
     tokens[placeholder] = match;
     return placeholder;
   });
 }
 
-function protectCodeBlocks(text: string, tokens: TokenMap, counter: { value: number }): string {
+function protectCodeBlocks(
+  text: string,
+  tokens: TokenMap,
+  counter: { value: number },
+  nonce: string,
+): string {
   const blocks = extractCodeBlocks(text);
   let result = text;
   for (const block of blocks) {
-    const placeholder = `__CODE_BLOCK_${counter.value}__`;
+    const placeholder = makePlaceholder("CODE_BLOCK", counter.value, nonce);
     counter.value += 1;
     tokens[placeholder] = block;
     result = result.replace(block, placeholder);
@@ -114,13 +129,18 @@ function protectCodeBlocks(text: string, tokens: TokenMap, counter: { value: num
   return result;
 }
 
-function protectHeadings(text: string, tokens: TokenMap, counter: { value: number }): string {
+function protectHeadings(
+  text: string,
+  tokens: TokenMap,
+  counter: { value: number },
+  nonce: string,
+): string {
   return text
     .split("\n")
     .map((line) => {
       const match = HEADING_REGEX.exec(line);
       if (!match) return line;
-      const placeholder = `__HEADING_${counter.value}__`;
+      const placeholder = makePlaceholder("HEADING", counter.value, nonce);
       counter.value += 1;
       tokens[placeholder] = match[2];
       return `${match[1]} ${placeholder}`;
@@ -131,22 +151,23 @@ function protectHeadings(text: string, tokens: TokenMap, counter: { value: numbe
 export function tokenizeMarkdown(content: string): { text: string; tokens: TokenMap } {
   const tokens: TokenMap = {};
   const counter = { value: 0 };
+  const nonce = makeNonce();
   const { frontmatter, body } = splitFrontmatter(content);
 
   let bodyText = body;
-  bodyText = protectCodeBlocks(bodyText, tokens, counter);
-  bodyText = protectMatches(bodyText, INLINE_CODE_REGEX, "INLINE_CODE", tokens, counter);
-  bodyText = protectMatches(bodyText, URL_REGEX, "URL", tokens, counter);
-  bodyText = protectMatches(bodyText, PATH_REGEX, "PATH", tokens, counter);
-  bodyText = protectHeadings(bodyText, tokens, counter);
+  bodyText = protectCodeBlocks(bodyText, tokens, counter, nonce);
+  bodyText = protectMatches(bodyText, INLINE_CODE_REGEX, "INLINE_CODE", tokens, counter, nonce);
+  bodyText = protectMatches(bodyText, URL_REGEX, "URL", tokens, counter, nonce);
+  bodyText = protectMatches(bodyText, PATH_REGEX, "PATH", tokens, counter, nonce);
+  bodyText = protectHeadings(bodyText, tokens, counter, nonce);
 
-  const carved = extractCarveOuts(bodyText);
+  const carved = extractCarveOuts(bodyText, nonce);
   bodyText = carved.text;
   Object.assign(tokens, carved.tokens);
 
   let text = bodyText;
   if (frontmatter) {
-    const placeholder = `__FRONTMATTER_${counter.value}__`;
+    const placeholder = makePlaceholder("FRONTMATTER", counter.value, nonce);
     counter.value += 1;
     tokens[placeholder] = frontmatter;
     text = placeholder + text;
@@ -156,11 +177,17 @@ export function tokenizeMarkdown(content: string): { text: string; tokens: Token
 }
 
 export function detokenizeMarkdown(text: string, tokens: TokenMap): string {
-  let result = text;
-  for (const [placeholder, original] of Object.entries(tokens)) {
-    result = result.split(placeholder).join(original);
+  const placeholders = Object.keys(tokens);
+  if (placeholders.length === 0) {
+    return text;
   }
-  return result;
+
+  // Longest-first exact match avoids partial key collisions between placeholders.
+  const escaped = placeholders
+    .sort((a, b) => b.length - a.length)
+    .map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const re = new RegExp(escaped.join("|"), "g");
+  return text.replace(re, (match) => tokens[match] ?? match);
 }
 
 export function extractProtectedRegions(content: string): TokenMap {

@@ -27,7 +27,7 @@ describe("Markdown Tokenizer", () => {
     expect(body).toBe("\nBody text.");
 
     const { text, tokens } = tokenizeMarkdown(input);
-    expect(text.startsWith("__FRONTMATTER_0__")).toBe(true);
+    expect(text).toMatch(/^__FRONTMATTER_0_[a-f0-9]{16}__/);
     const restored = detokenizeMarkdown(text, tokens);
     expect(restored).toBe(input);
   });
