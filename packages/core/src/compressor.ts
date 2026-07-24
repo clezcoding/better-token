@@ -26,7 +26,7 @@ export interface CompressFileResult {
   delta: number;
 }
 
-const CANONICAL_BASENAMES = new Set([
+export const CANONICAL_BASENAMES = new Set([
   "CLAUDE.md",
   ".cursorrules",
   "AGENTS.md",

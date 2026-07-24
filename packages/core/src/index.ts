@@ -12,6 +12,7 @@ export interface ValidationResult {
 
 export { tokenizeMarkdown, detokenizeMarkdown, extractProtectedRegions } from "./tokenizer.js";
 export {
+  CANONICAL_BASENAMES,
   compressMarkdown,
   compressProse,
   compressMarkdownWithValidation,

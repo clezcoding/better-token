@@ -6,6 +6,7 @@ import { Command } from "commander";
 import { encode } from "bpe-lite";
 import { z } from "zod";
 import {
+  CANONICAL_BASENAMES,
   compressFile,
   compressMarkdownWithValidation,
   detectCanonicalFiles,
@@ -22,15 +23,6 @@ const OptionsSchema = z.object({
 });
 
 const PathSchema = z.string().min(1);
-
-const CANONICAL_BASENAMES = new Set([
-  "CLAUDE.md",
-  ".cursorrules",
-  "AGENTS.md",
-  "GEMINI.md",
-  "CLAUDE.local.md",
-  "AGENT.md",
-]);
 
 function isInteractiveTTY(): boolean {
   if (process.stdin.isTTY === true) {
