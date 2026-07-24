@@ -11,7 +11,7 @@ export const CARVEOUT_CATEGORIES = [
 export type CarveoutCategory = (typeof CARVEOUT_CATEGORIES)[number];
 
 const ERROR_LINE_REGEX =
-  /^\s*(Error|TypeError|ReferenceError|SyntaxError|RangeError|RuntimeError|Warning|FatalError|Exception|panic):\s.*$/gim;
+  /^\s*(Error|TypeError|ReferenceError|SyntaxError|RangeError|RuntimeError|FatalError|Exception|panic):\s.*$/gim;
 const ERROR_BACKTICK_REGEX = /`(?:Error|TypeError|ReferenceError|SyntaxError|RangeError|RuntimeError|Warning|FatalError|Exception|panic):[^`]+`/g;
 const GIT_COMMIT_REGEX = /git commit -m ["'][^"']+["']/g;
 const CONVENTIONAL_COMMIT_REGEX =
