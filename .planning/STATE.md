@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 1 of 5 (L1 Compression Engine & Validator)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
-Last activity: 2026-07-24 — Roadmap created (5 phases, 26/26 requirements mapped)
+Last activity: 2026-07-25 - Completed quick task 260725-1my: Fix .gitignore + GitHub automation + GSD config verify
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -70,6 +70,12 @@ None yet.
 - Phase 3 will need deeper research into Claude Code hook payloads and `hookSpecificOutput` behavior during compaction (flagged in research/SUMMARY.md)
 - Phase 2 will need research into stdio JSON-RPC stream buffering to avoid stream-draining regressions
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260725-1my | Fix .gitignore + GitHub CI/automation stack + verify GSD Cursor config | 2026-07-25 | 22a9bdc | [260725-1my-task-1-fix-gitignore-so-only-relevant-fi](./quick/260725-1my-task-1-fix-gitignore-so-only-relevant-fi/) |
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -80,6 +86,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24 06:20
-Stopped at: Roadmap created — 5 phases, 26/26 requirements mapped, awaiting plan-phase
+Last session: 2026-07-25
+Stopped at: Completed quick task 260725-1my (gitignore + GitHub automation)
 Resume file: None

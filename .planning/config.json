@@ -1,4 +1,5 @@
 {
+  "runtime": "cursor",
   "model_profile": "inherit",
   "commit_docs": true,
   "parallelization": true,
@@ -11,11 +12,12 @@
   "perplexity": false,
   "jina": false,
   "git": {
-    "branching_strategy": "none",
+    "branching_strategy": "phase",
     "create_tag": true,
+    "base_branch": "main",
     "phase_branch_template": "gsd/phase-{phase}-{slug}",
     "milestone_branch_template": "gsd/{milestone}-{slug}",
-    "quick_branch_template": null
+    "quick_branch_template": "gsd/quick-{quick}-{slug}"
   },
   "workflow": {
     "research": true,
@@ -48,7 +50,8 @@
     "security_asvs_level": 1,
     "security_block_on": "high",
     "tdd_mode": false,
-    "ui_review": true
+    "ui_review": true,
+    "use_worktrees": false
   },
   "ship": {
     "pr_body_sections": []
@@ -59,7 +62,7 @@
   "project_code": null,
   "phase_naming": "sequential",
   "agent_skills": {},
-  "claude_md_path": "./.claude/.cursor/rules/",
+  "claude_md_path": "./.cursor/rules/",
   "plan_review": {
     "source_grounding": true,
     "source_grounding_authority": "grep"

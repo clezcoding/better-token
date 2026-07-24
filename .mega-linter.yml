@@ -1,0 +1,35 @@
+APPLY_FIXES: none
+
+FILTER_REGEX_EXCLUDE: (node_modules|dist|coverage|\.planning/research/\.cache)
+
+ENABLE_LINTERS:
+  - TYPESCRIPT
+  - JSON
+  - YAML
+  - MARKDOWN
+  - ACTION
+  - REPOSITORY_GITIGNORE
+  - GITHUB_ACTIONS
+  - GITLEAKS
+
+DISABLE_LINTERS:
+  - COPYPASTE
+  - SPELL
+  - JAVASCRIPT
+  - JSX
+  - CSS
+  - HTML
+  - DOCKERFILE
+  - PYTHON
+  - RUBY
+  - GO
+  - RUST
+  - JAVA
+  - KOTLIN
+  - C
+  - CPP
+  - CSHARP
+  - PHP
+  - SQL
+  - BASH
+  - POWERSHELL

@@ -1,0 +1,28 @@
+# deps / build
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.turbo/
+*.original
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / IDE
+.DS_Store
+.idea/
+*.swp
+.vscode/*
+!.vscode/extensions.json
+
+# planning noise
+.planning/research/.cache/
+.planning/**/HANDOFF.json
+
+# logs / misc
+*.log
+npm-debug.log*
+.nyc_output/
