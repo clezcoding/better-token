@@ -4,8 +4,7 @@ import { resolve } from "node:path";
 import { Command } from "commander";
 import { encode } from "bpe-lite";
 import { z } from "zod";
-import { compressMarkdown } from "./compressor.js";
-import { validate } from "./validator.js";
+import { compressMarkdownWithValidation } from "./compressor.js";
 import type { CompressionMode } from "./index.js";
 
 const OptionsSchema = z.object({
@@ -67,8 +66,10 @@ async function runCompress(
 ): Promise<number> {
   const resolved = resolve(filePath);
   const original = await readFile(resolved, "utf-8");
-  const compressed = compressMarkdown(original, options.mode);
-  const validation = validate(original, compressed);
+  const { content: compressed, validation } = compressMarkdownWithValidation(
+    original,
+    options.mode,
+  );
 
   const before = countTokens(original);
   const after = countTokens(compressed);
