@@ -1,6 +1,7 @@
 import {
   access,
   lstat,
+  open,
   readFile,
   writeFile,
   unlink,
@@ -90,14 +91,30 @@ export async function createSidecarIfMissing(
   await assertNotSymlink(path);
   await assertNotSymlink(sidecar);
   const bytes = content ?? (await readFileWithCap(path));
+  await resolveSafeParentDir(path);
+
+  // Exclusive create + full write; unlink on failure so a partial sidecar
+  // is never left as immutable truth for later compress/rollback.
+  let handle: Awaited<ReturnType<typeof open>> | undefined;
   try {
-    await resolveSafeParentDir(path);
-    await writeFile(sidecar, bytes, { encoding: "utf-8", flag: "wx" });
-    return true;
+    handle = await open(sidecar, "wx");
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "EEXIST") {
       return false;
     }
+    throw err;
+  }
+
+  try {
+    await handle.writeFile(bytes, "utf-8");
+    await handle.close();
+    handle = undefined;
+    return true;
+  } catch (err) {
+    if (handle) {
+      await handle.close().catch(() => {});
+    }
+    await unlink(sidecar).catch(() => {});
     throw err;
   }
 }
