@@ -86,10 +86,20 @@ export function extractPaths(text: string): string[] {
 }
 
 export function extractInlineCodes(text: string): string[] {
-  const withoutFences = text
-    .split("\n")
-    .filter((line) => !FENCE_OPEN_REGEX.test(line))
-    .join("\n");
+  // Strip full fenced regions (not just fence marker lines) so backticks
+  // inside code blocks are not counted as inline code.
+  const blocks = extractCodeBlocks(text);
+  let withoutFences = "";
+  let cursor = 0;
+  for (const block of blocks) {
+    const idx = text.indexOf(block, cursor);
+    if (idx === -1) {
+      continue;
+    }
+    withoutFences += text.slice(cursor, idx);
+    cursor = idx + block.length;
+  }
+  withoutFences += text.slice(cursor);
   return [...withoutFences.matchAll(INLINE_CODE_REGEX)].map((m) => m[0]);
 }
 
