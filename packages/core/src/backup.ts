@@ -45,7 +45,7 @@ async function resolveSafeParentDir(filePath: string): Promise<string> {
   return realpath(parent);
 }
 
-async function readFileWithCap(path: string): Promise<string> {
+export async function readFileWithCap(path: string): Promise<string> {
   await assertNotSymlink(path);
   const stats = await stat(path);
   if (stats.size > MAX_FILE_SIZE) {

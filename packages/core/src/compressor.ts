@@ -1,5 +1,5 @@
 import type { CompressionMode } from "./index.js";
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import { access, constants } from "node:fs";
 import { promisify } from "node:util";
 import { join, resolve } from "node:path";
@@ -10,6 +10,7 @@ import {
   atomicWriteFile,
   createSidecarIfMissing,
   hasSidecar,
+  readFileWithCap,
   readSidecar,
 } from "./backup.js";
 
@@ -309,7 +310,7 @@ export async function compressFile(
   path: string,
   options: { mode: CompressionMode; dryRun?: boolean },
 ): Promise<CompressFileResult> {
-  const currentContent = await readFile(path, "utf-8");
+  const currentContent = await readFileWithCap(path);
 
   const original = (await hasSidecar(path))
     ? await readSidecar(path)

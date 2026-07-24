@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { lstat, open, readFile, realpath, stat } from "node:fs/promises";
+import { lstat, open, realpath, stat } from "node:fs/promises";
 import { createInterface } from "node:readline";
 import { dirname, resolve, basename } from "node:path";
 import { Command } from "commander";
@@ -10,7 +10,7 @@ import {
   compressMarkdownWithValidation,
   detectCanonicalFiles,
 } from "./compressor.js";
-import { MissingSidecarError, restoreFromSidecar } from "./backup.js";
+import { MissingSidecarError, readFileWithCap, restoreFromSidecar } from "./backup.js";
 import { validate } from "./validator.js";
 import type { CompressionMode } from "./index.js";
 
@@ -166,7 +166,7 @@ async function runCompress(
   const resolved = pathCheck.resolved;
 
   if (options.dryRun) {
-    const original = await readFile(resolved, "utf-8");
+    const original = await readFileWithCap(resolved);
     const { content: compressed, validation } = compressMarkdownWithValidation(
       original,
       options.mode,
@@ -237,7 +237,7 @@ async function runValidate(filePath: string): Promise<number> {
   }
 
   const resolved = pathCheck.resolved;
-  const current = await readFile(resolved, "utf-8");
+  const current = await readFileWithCap(resolved);
   const sidecarPath = `${resolved}.original`;
 
   let original = current;
@@ -245,7 +245,7 @@ async function runValidate(filePath: string): Promise<number> {
 
   try {
     await stat(sidecarPath);
-    original = await readFile(sidecarPath, "utf-8");
+    original = await readFileWithCap(sidecarPath);
     hasSidecar = true;
   } catch {
     hasSidecar = false;
