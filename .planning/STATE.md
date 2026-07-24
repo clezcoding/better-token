@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 1
-current_phase_name: L1 Compression Engine & Validator
-status: planning
-stopped_at: Phase 1 plans revised (3 plans, waves 1-3, SAFE-02 carve-outs added)
-last_updated: "2026-07-24T07:15:00.000Z"
+current_phase: 01
+current_phase_name: l1-compression-engine-validator
+status: executing
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-07-24T05:36:05.998Z"
 last_activity: 2026-07-24
-last_activity_desc: Phase 1 plans revised per checker — 01-PATTS→01-PATTERNS rename, RESEARCH Open Questions resolved, SAFE-02 semantic carve-outs added as 01-01 Task 4, Task 1 fields + Artifacts + assumptions blocks added, remark deps removed (regex tokenizer per CONTEXT discretion)
+last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-24)
 
 **Core value:** Deterministic, byte-verified input/context compression that cuts tokens without substance loss — every time, not only when the model cooperates.
-**Current focus:** Phase 1 — L1 Compression Engine & Validator
+**Current focus:** Phase 01 — l1-compression-engine-validator
 
 ## Current Position
 
-Phase: 1 of 5 (L1 Compression Engine & Validator)
-Plan: 0 of 3 in current phase
-Status: Planning revised per checker — ready to execute
-Last activity: 2026-07-24 — Phase 1 plans revised (SAFE-02 carve-outs added as 01-01 Task 4, 01-PATTS→01-PATTERNS rename, RESEARCH Open Questions resolved, remark deps removed, Task 1 fields + Artifacts + assumptions blocks added)
+Phase: 01 (l1-compression-engine-validator) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-07-24 — Phase 01 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -58,6 +58,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 01-l1-compression-engine-validator P01 | 8 | 4 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -69,6 +74,8 @@ Recent decisions affecting current work:
 - [Init]: L1 = deterministic heuristics (no LLM rewrite in v1); validator is hard gate with `.original` rollback
 - [Init]: Depth-first — Claude Code + Cursor before breadth
 - [Init]: Package/CLI named `better-token`; OSS core, MIT, no telemetry, English docs
+- [Phase ?]: T-01-SC: human approved typescript, vitest, tsx before npm install
+- [Phase ?]: compressMarkdownWithValidation exposes validation to CLI without bypassing gate
 
 ### Pending Todos
 
@@ -89,6 +96,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T04:45:06.375Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-l1-compression-engine-validator/01-CONTEXT.md
+Last session: 2026-07-24T05:36:05.992Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None

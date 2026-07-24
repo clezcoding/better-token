@@ -35,12 +35,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. After any compression, code blocks, inline code, URLs, paths, and headings are byte-identical to the original — and on any mismatch the compressed version is discarded and the original kept
   5. User can roll back to the `.original` backup, and re-running compression on an already-compressed file makes no further change
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — Walking Skeleton: scaffold + `compress --dry-run` end-to-end with real tokenizer + balanced-mode heuristic + byte-exact validator gate
+- [x] 01-01-PLAN.md — Walking Skeleton: scaffold + `compress --dry-run` end-to-end with real tokenizer + balanced-mode heuristic + byte-exact validator gate
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. L1 Compression Engine & Validator | 0/3 | Planning complete | - |
+| 1. L1 Compression Engine & Validator | 1/3 | In Progress|  |
 | 2. MCP Shrink Proxy | 0/TBD | Not started | - |
 | 3. Claude Code & Cursor Adapters | 0/TBD | Not started | - |
 | 4. Honest Stats & Verification | 0/TBD | Not started | - |
