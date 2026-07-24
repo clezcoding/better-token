@@ -344,12 +344,18 @@ cli
   .option("--diff", "Show unified diff of changes", false)
   .option("-y, --yes", "Compress all detected canonical files without prompting", false)
   .action(async (path: string | undefined, rawOptions: Record<string, unknown>) => {
-    const parsed = OptionsSchema.parse({
+    const parsedResult = OptionsSchema.safeParse({
       mode: rawOptions.mode ?? "balanced",
       dryRun: rawOptions.dryRun === true,
       diff: rawOptions.diff === true,
       yes: rawOptions.yes === true,
     });
+    if (!parsedResult.success) {
+      console.error(parsedResult.error.issues[0]?.message ?? "invalid options");
+      process.exit(1);
+      return;
+    }
+    const parsed = parsedResult.data;
 
     if (path) {
       const exitCode = await runCompress(path, parsed);
