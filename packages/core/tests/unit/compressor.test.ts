@@ -32,6 +32,18 @@ describe("Compressor", () => {
     expect(output).not.toMatch(/\bPlease\b/);
   });
 
+  it("SAFE-02: carve-out lines survive balanced compression", () => {
+    const input = readFileSync(fixturePath, "utf-8");
+    const output = compressMarkdown(input, "balanced");
+    expect(output).toContain("Error: something went wrong");
+    expect(output).toContain('git commit -m "feat(core): add compression engine"');
+    expect(output).toContain("WARNING: never expose API keys");
+    expect(output).toContain("confirm");
+    expect(output).toMatch(/1\. First step/);
+    expect(output).toMatch(/2\. Second step/);
+    expect(output).toMatch(/3\. Third step/);
+  });
+
   it("COMP-02 placeholder: aggressive must not invent abbreviations (Plan 03)", () => {
     const input = "configuration management database";
     const output = compressProse(input, "aggressive");

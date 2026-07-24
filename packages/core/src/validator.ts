@@ -1,12 +1,12 @@
-import type { CompressionMode, ValidationResult } from "./index.js";
-import { compressProse } from "./compressor.js";
-import { detokenizeMarkdown, splitFrontmatter, tokenizeMarkdown } from "./tokenizer.js";
+import type { ValidationResult } from "./index.js";
+import { CARVEOUT_CATEGORIES, extractCarveoutStrings } from "./carveouts.js";
 import {
   extractCodeBlocks,
   extractHeadings,
   extractInlineCodes,
   extractPaths,
   extractUrls,
+  splitFrontmatter,
 } from "./tokenizer.js";
 
 export function validate(original: string, compressed: string): ValidationResult {
@@ -51,6 +51,16 @@ export function validate(original: string, compressed: string): ValidationResult
   const compHeadings = extractHeadings(compBody);
   if (JSON.stringify(origHeadings) !== JSON.stringify(compHeadings)) {
     errors.push("Heading sequence or text changed");
+  }
+
+  const origCarveouts = extractCarveoutStrings(origBody);
+  const compCarveouts = extractCarveoutStrings(compBody);
+  for (const category of CARVEOUT_CATEGORIES) {
+    if (JSON.stringify(origCarveouts[category]) !== JSON.stringify(compCarveouts[category])) {
+      errors.push(
+        `Carve-out mismatch (${category}): lost=${origCarveouts[category].filter((v) => !compCarveouts[category].includes(v)).join("|")}`,
+      );
+    }
   }
 
   return {

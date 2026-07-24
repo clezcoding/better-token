@@ -1,4 +1,5 @@
 import type { TokenMap } from "./index.js";
+import { extractCarveOuts } from "./carveouts.js";
 
 const FRONTMATTER_REGEX = /^(---\r?\n[\s\S]*?\r?\n---\r?\n)([\s\S]*)$/;
 const FENCE_OPEN_REGEX = /^(\s{0,3})(`{3,}|~{3,})(.*)$/;
@@ -132,19 +133,24 @@ export function tokenizeMarkdown(content: string): { text: string; tokens: Token
   const counter = { value: 0 };
   const { frontmatter, body } = splitFrontmatter(content);
 
-  let text = body;
+  let bodyText = body;
+  bodyText = protectCodeBlocks(bodyText, tokens, counter);
+  bodyText = protectMatches(bodyText, INLINE_CODE_REGEX, "INLINE_CODE", tokens, counter);
+  bodyText = protectMatches(bodyText, URL_REGEX, "URL", tokens, counter);
+  bodyText = protectMatches(bodyText, PATH_REGEX, "PATH", tokens, counter);
+  bodyText = protectHeadings(bodyText, tokens, counter);
+
+  const carved = extractCarveOuts(bodyText);
+  bodyText = carved.text;
+  Object.assign(tokens, carved.tokens);
+
+  let text = bodyText;
   if (frontmatter) {
     const placeholder = `__FRONTMATTER_${counter.value}__`;
     counter.value += 1;
     tokens[placeholder] = frontmatter;
     text = placeholder + text;
   }
-
-  text = protectCodeBlocks(text, tokens, counter);
-  text = protectMatches(text, INLINE_CODE_REGEX, "INLINE_CODE", tokens, counter);
-  text = protectMatches(text, URL_REGEX, "URL", tokens, counter);
-  text = protectMatches(text, PATH_REGEX, "PATH", tokens, counter);
-  text = protectHeadings(text, tokens, counter);
 
   return { text, tokens };
 }

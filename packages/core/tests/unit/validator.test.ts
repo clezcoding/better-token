@@ -48,4 +48,20 @@ describe("Validator", () => {
     expect(result.ok).toBe(false);
     expect(result.errors.some((e) => e.includes("Heading"))).toBe(true);
   });
+
+  it("SAFE-01: fails when carve-out line is mutated", () => {
+    const original = "Error: something went wrong";
+    const compressed = "Error: something else happened";
+    const result = validate(original, compressed);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.includes("Carve-out mismatch (error)"))).toBe(true);
+  });
+
+  it("SAFE-02: fails when numbered step is mutated", () => {
+    const original = "1. First step\n2. Second step";
+    const compressed = "1. First step\n2. Changed step";
+    const result = validate(original, compressed);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.includes("Carve-out mismatch (step)"))).toBe(true);
+  });
 });

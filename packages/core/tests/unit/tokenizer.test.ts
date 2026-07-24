@@ -13,7 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixturePath = resolve(__dirname, "../fixtures/sample-claude.md");
 
 describe("Markdown Tokenizer", () => {
-  it("SAFE-02: round-trips fixture byte-for-byte", () => {
+  it("SAFE-02: round-trips fixture byte-for-byte including carve-outs", () => {
     const input = readFileSync(fixturePath, "utf-8");
     const { text, tokens } = tokenizeMarkdown(input);
     const restored = detokenizeMarkdown(text, tokens);
