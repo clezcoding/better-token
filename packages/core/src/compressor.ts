@@ -76,7 +76,7 @@ function normalizeWhitespace(prose: string): string {
     if (lineHasPlaceholder(line)) {
       return line;
     }
-    return line.replace(/[ \t]+/g, " ").trimEnd();
+    return line.replace(/[ \t]+/g, " ").trim();
   });
   let result = processed.join("\n");
   result = result.replace(/\n{3,}/g, "\n\n");
