@@ -1,0 +1,12 @@
+{
+  "name": "better-token",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=@better-token/core",
+    "test": "npm run test --workspace=@better-token/core",
+    "dev": "npm run dev --workspace=@better-token/core"
+  }
+}
