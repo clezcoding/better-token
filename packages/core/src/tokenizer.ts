@@ -42,7 +42,6 @@ export function extractCodeBlocks(text: string): string[] {
     const fenceLen = openMatch[2].length;
     const blockLines = [lines[i] ?? ""];
     i += 1;
-    let closed = false;
 
     while (i < lines.length) {
       const closeMatch = FENCE_OPEN_REGEX.exec(lines[i] ?? "");
@@ -53,7 +52,6 @@ export function extractCodeBlocks(text: string): string[] {
         closeMatch[3].trim() === ""
       ) {
         blockLines.push(lines[i] ?? "");
-        closed = true;
         i += 1;
         break;
       }
@@ -61,9 +59,8 @@ export function extractCodeBlocks(text: string): string[] {
       i += 1;
     }
 
-    if (closed) {
-      blocks.push(blockLines.join("\n"));
-    }
+    // Fail closed: unclosed fences are protected through EOF.
+    blocks.push(blockLines.join("\n"));
   }
 
   return blocks;
