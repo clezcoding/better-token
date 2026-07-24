@@ -64,15 +64,22 @@ export async function atomicWriteFile(targetPath: string, content: string): Prom
   }
 }
 
-export async function createSidecarIfMissing(path: string): Promise<boolean> {
-  if (await sidecarExists(path)) {
-    return false;
+export async function createSidecarIfMissing(
+  path: string,
+  content?: string,
+): Promise<boolean> {
+  const sidecar = sidecarPathFor(path);
+  const bytes = content ?? (await readFileWithCap(path));
+  try {
+    await resolveSafeParentDir(path);
+    await writeFile(sidecar, bytes, { encoding: "utf-8", flag: "wx" });
+    return true;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "EEXIST") {
+      return false;
+    }
+    throw err;
   }
-
-  await resolveSafeParentDir(path);
-  const content = await readFileWithCap(path);
-  await writeFile(sidecarPathFor(path), content, "utf-8");
-  return true;
 }
 
 export async function readSidecar(path: string): Promise<string> {
