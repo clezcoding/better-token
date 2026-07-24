@@ -23,7 +23,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-24)
 
 **Core value:** Deterministic, byte-verified input/context compression that cuts tokens without substance loss — every time, not only when the model cooperates.
-**Current focus:** Phase 01 — l1-compression-engine-validator
+**Current focus:** Phase 2 — MCP Shrink Proxy
 
 ## Current Position
 
