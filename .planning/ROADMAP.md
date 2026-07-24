@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. After any compression, code blocks, inline code, URLs, paths, and headings are byte-identical to the original — and on any mismatch the compressed version is discarded and the original kept
   5. User can roll back to the `.original` backup, and re-running compression on an already-compressed file makes no further change
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 Plans:
 **Wave 1**
@@ -48,7 +48,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-03-PLAN.md — `safe` / `aggressive` modes + interactive TTY prompt + `--yes` non-TTY + standalone `validate` command + path validation
+- [x] 01-03-PLAN.md — `safe` / `aggressive` modes + interactive TTY prompt + `--yes` non-TTY + standalone `validate` command + path validation
 
 **Cross-cutting constraints:**
 
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. L1 Compression Engine & Validator | 2/3 | In Progress|  |
+| 1. L1 Compression Engine & Validator | 3/3 | In Progress|  |
 | 2. MCP Shrink Proxy | 0/TBD | Not started | - |
 | 3. Claude Code & Cursor Adapters | 0/TBD | Not started | - |
 | 4. Honest Stats & Verification | 0/TBD | Not started | - |
