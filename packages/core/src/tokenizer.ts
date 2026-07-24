@@ -119,13 +119,26 @@ function protectCodeBlocks(
   nonce: string,
 ): string {
   const blocks = extractCodeBlocks(text);
-  let result = text;
+  if (blocks.length === 0) {
+    return text;
+  }
+
+  // Walk by offset so identical fence contents each get their own placeholder.
+  let result = "";
+  let cursor = 0;
   for (const block of blocks) {
+    const idx = text.indexOf(block, cursor);
+    if (idx === -1) {
+      continue;
+    }
+    result += text.slice(cursor, idx);
     const placeholder = makePlaceholder("CODE_BLOCK", counter.value, nonce);
     counter.value += 1;
     tokens[placeholder] = block;
-    result = result.replace(block, placeholder);
+    result += placeholder;
+    cursor = idx + block.length;
   }
+  result += text.slice(cursor);
   return result;
 }
 
