@@ -461,11 +461,13 @@ import { z } from "zod";
 const DEFAULT_SHRINK_FIELDS = "tools.description,prompts.description,resources.description";
 
 export function parseShrinkFields(raw: string | undefined): Set<string> {
-  const value = raw?.trim() || DEFAULT_SHRINK_FIELDS;
-  const parts = value.split(",").map((s) => s.trim()).filter(Boolean);
+  // D-12 literally: any unknown token OR empty selection → warn once + full D-09 defaults
+  if (!raw?.trim()) return new Set(["tools.description", "prompts.description", "resources.description"]);
+  const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
   const allowed = new Set(["tools.description", "prompts.description", "resources.description"]);
+  const hasUnknown = parts.some((p) => !allowed.has(p));
   const selected = new Set(parts.filter((p) => allowed.has(p)));
-  if (selected.size === 0) {
+  if (hasUnknown || selected.size === 0) {
     process.stderr.write("better-token proxy: invalid BETTER_TOKEN_SHRINK_FIELDS; using defaults\n");
     return new Set(allowed);
   }
@@ -527,17 +529,19 @@ rl.on("line", (line) => {
 | A4 | `compressMarkdownWithValidation` is correct for MCP descriptions (may contain markdown) | Standard Stack | Plain-text-only descriptions might over-process; validator still guards |
 | A5 | No runtime `@modelcontextprotocol/sdk` dependency | Standard Stack | Faster implementation but team must maintain NDJSON framing |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **JSON-RPC batch shrink support in v1?**
    - What we know: MCP spec allows batch arrays on one line.
    - What's unclear: How common among real upstream servers (GitHub MCP, filesystem, etc.).
    - Recommendation: Pass-through batches in v1; add fixture test documenting behavior.
+   - **RESOLVED:** JSON-RPC batch arrays pass through unchanged (A2) — no shrink attempt when `JSON.parse` yields an Array; document with fixture/integration assertion in 02-03.
 
 2. **Paginated `tools/list` (`nextCursor`)?**
    - What we know: SDK schemas include pagination [CITED: typescript-sdk ListToolsResultSchema].
    - What's unclear: Whether shrink must preserve cursor fields untouched (yes — only descriptions mutate).
    - Recommendation: Shrink only `description` on each page's items; pass `nextCursor` unchanged.
+   - **RESOLVED:** `nextCursor` (and other non-description pagination fields) remain untouched; shrink only item `description` strings on each page.
 
 ## Environment Availability
 
