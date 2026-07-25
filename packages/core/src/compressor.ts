@@ -113,6 +113,35 @@ function compressBalanced(prose: string): string {
   return normalizeWhitespace(withFillers);
 }
 
+/**
+ * Linear bullet-line parse — avoids whitespace-quantifier overlap ReDoS (CodeQL #1/#2).
+ * Marker includes leading indent + bullet char + trailing whitespace (same as old regex group 1).
+ */
+function matchBulletLine(line: string): { marker: string; text: string } | null {
+  let i = 0;
+  while (i < line.length && (line[i] === " " || line[i] === "\t")) {
+    i += 1;
+  }
+  if (i >= line.length) {
+    return null;
+  }
+  const bullet = line[i];
+  if (bullet !== "-" && bullet !== "*" && bullet !== "+") {
+    return null;
+  }
+  i += 1;
+  if (i >= line.length || (line[i] !== " " && line[i] !== "\t")) {
+    return null;
+  }
+  while (i < line.length && (line[i] === " " || line[i] === "\t")) {
+    i += 1;
+  }
+  if (i >= line.length) {
+    return null;
+  }
+  return { marker: line.slice(0, i), text: line.slice(i) };
+}
+
 function compactAdjacentBullets(text: string): string {
   const lines = text.split("\n");
   const result: string[] = [];
@@ -120,7 +149,7 @@ function compactAdjacentBullets(text: string): string {
 
   while (i < lines.length) {
     const line = lines[i] ?? "";
-    const bulletMatch = /^(\s*[-*+]\s+)(.+)$/.exec(line);
+    const bulletMatch = matchBulletLine(line);
 
     if (!bulletMatch || lineHasPlaceholder(line)) {
       result.push(line);
@@ -128,17 +157,17 @@ function compactAdjacentBullets(text: string): string {
       continue;
     }
 
-    const marker = bulletMatch[1];
-    const texts = [bulletMatch[2]];
+    const marker = bulletMatch.marker;
+    const texts = [bulletMatch.text];
     let j = i + 1;
 
     while (j < lines.length) {
       const next = lines[j] ?? "";
-      const nextMatch = /^(\s*[-*+]\s+)(.+)$/.exec(next);
-      if (!nextMatch || nextMatch[1] !== marker || lineHasPlaceholder(next)) {
+      const nextMatch = matchBulletLine(next);
+      if (!nextMatch || nextMatch.marker !== marker || lineHasPlaceholder(next)) {
         break;
       }
-      texts.push(nextMatch[2]);
+      texts.push(nextMatch.text);
       j += 1;
     }
 

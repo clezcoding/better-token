@@ -4,11 +4,31 @@ import { extractCarveOuts } from "./carveouts.js";
 
 const FRONTMATTER_REGEX = /^(---\r?\n[\s\S]*?\r?\n---\r?\n)([\s\S]*)$/;
 const FENCE_OPEN_REGEX = /^(\s{0,3})(`{3,}|~{3,})(.*)$/;
-const HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 const URL_REGEX = /https?:\/\/[^\s)]+/g;
 const INLINE_CODE_REGEX = /`[^`\n]+`/g;
+// Segment + separator form avoids polynomial backtracking on '/' and '-'
+// (CodeQL js/polynomial-redos: old [\w\-/\\.]+ overlapped separators).
 const PATH_REGEX =
-  /(?:\.\/|\.\.\/|\/|[A-Za-z]:\\)[\w\-/\\.]+\b|[\w\-.]+[/\\][\w\-/\\.]+/g;
+  /(?:\.\/|\.\.\/|\/|[A-Za-z]:\\)[\w.-]+(?:[\/\\][\w.-]+)*\b|[\w.-]+(?:[\/\\][\w.-]+)+/g;
+
+/** Linear ATX heading parse — avoids \s+/(.*) space backtracking (CodeQL #3/#6). */
+function matchHeadingLine(line: string): [hashes: string, title: string] | null {
+  let i = 0;
+  while (i < line.length && i < 6 && line[i] === "#") {
+    i += 1;
+  }
+  if (i === 0) {
+    return null;
+  }
+  if (i >= line.length || (line[i] !== " " && line[i] !== "\t")) {
+    return null;
+  }
+  const hashes = line.slice(0, i);
+  while (i < line.length && (line[i] === " " || line[i] === "\t")) {
+    i += 1;
+  }
+  return [hashes, line.slice(i)];
+}
 
 function makeNonce(): string {
   return randomBytes(8).toString("hex");
@@ -69,9 +89,9 @@ export function extractCodeBlocks(text: string): string[] {
 export function extractHeadings(text: string): Array<[string, string]> {
   const headings: Array<[string, string]> = [];
   for (const line of text.split("\n")) {
-    const match = HEADING_REGEX.exec(line);
+    const match = matchHeadingLine(line);
     if (match) {
-      headings.push([match[1], match[2]]);
+      headings.push(match);
     }
   }
   return headings;
@@ -158,12 +178,12 @@ function protectHeadings(
   return text
     .split("\n")
     .map((line) => {
-      const match = HEADING_REGEX.exec(line);
+      const match = matchHeadingLine(line);
       if (!match) return line;
       const placeholder = makePlaceholder("HEADING", counter.value, nonce);
       counter.value += 1;
-      tokens[placeholder] = match[2];
-      return `${match[1]} ${placeholder}`;
+      tokens[placeholder] = match[1];
+      return `${match[0]} ${placeholder}`;
     })
     .join("\n");
 }
