@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: mcp-shrink-proxy
-status: uat_passed_awaiting_security
-stopped_at: UAT complete 3/3 — blocked on SECURITY.md
+status: security_verified
+stopped_at: SECURITY.md verified threats_open:0 — ready for validate/transition
 last_updated: "2026-07-25T05:06:28.807Z"
 last_activity: 2026-07-25
 last_activity_desc: Phase 02 execution started
@@ -28,9 +28,9 @@ Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignor
 
 ## Current Position
 
-Phase: 02 (mcp-shrink-proxy) — UAT PASSED (awaiting security)
+Phase: 02 (mcp-shrink-proxy) — SECURITY VERIFIED
 Plan: 2 of 4
-Status: UAT 3/3 passed; /gsd-secure-phase 02 required before transition
+Status: UAT 3/3 + SECURITY verified (threats_open:0); next /gsd-validate-phase 02 or transition
 Last activity: 2026-07-25 — Phase 02 execution started
 
 Progress: [██████████] 100% (Phase 1 done; Phase 2 planned)
