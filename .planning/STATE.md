@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: mcp-shrink-proxy
-status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-07-25T03:38:48.723Z"
+status: verifying
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-07-25T03:50:21.856Z"
 last_activity: 2026-07-25
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -30,10 +30,10 @@ Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignor
 
 Phase: 02 (mcp-shrink-proxy) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-25 — Phase 02 execution started
 
-Progress: [████████░░] 83% (Phase 1 done; Phase 2 planned)
+Progress: [██████████] 100% (Phase 1 done; Phase 2 planned)
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [████████░░] 83% (Phase 1 done; Phase 2 planned)
 | Phase 01-l1-compression-engine-validator P03 | 4 | 2 tasks | 5 files |
 | Phase 02 P01 | 6 | 2 tasks | 15 files |
 | Phase 02-mcp-shrink-proxy P02 | 2 | 2 tasks | 4 files |
+| Phase 02-mcp-shrink-proxy P03 | 525649min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Recent decisions affecting current work:
 - [Phase ?]: D-12 mixed valid+invalid CSV falls back to full D-09 defaults, not valid-only subset
 - [Phase ?]: Unset BETTER_TOKEN_SHRINK_FIELDS uses D-09 defaults silently; empty/whitespace warns then defaults
 - [Phase ?]: CLI --mode overrides BETTER_TOKEN_MODE when both set (A3)
+- [Phase ?]: Parse-error stderr always-on regardless of debug (D-13); shrink stats gated on BETTER_TOKEN_DEBUG (D-14/D-16)
+- [Phase ?]: Batch JSON-RPC arrays pass through unchanged without shrink (A2)
+- [Phase ?]: Partial trailing NDJSON flushed as pass-through on upstream close
 
 ### Pending Todos
 
@@ -118,7 +122,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T03:38:48.717Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-07-25T03:50:21.851Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
 PR: https://github.com/clezcoding/better-token/pull/1

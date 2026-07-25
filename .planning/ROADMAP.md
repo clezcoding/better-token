@@ -69,7 +69,7 @@ Plans:
   3. `tools/call` request payloads and responses pass through byte-identical — no mutation, no data loss
   4. When the proxy hits a parse error it falls back to pass-through, and the user can configure which fields are compressed via environment variables
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 Plans:
 **Wave 1**
@@ -82,7 +82,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 02-03-PLAN.md — Parse-error pass-through + exit/debug hardening + IDE verify (MCP-03)
+- [x] 02-03-PLAN.md — Parse-error pass-through + exit/debug hardening + IDE verify (MCP-03)
 
 ### Phase 3: Claude Code & Cursor Adapters
 
@@ -141,7 +141,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. L1 Compression Engine & Validator | 3/3 | Complete    | 2026-07-24 |
-| 2. MCP Shrink Proxy | 2/3 | In Progress|  |
+| 2. MCP Shrink Proxy | 3/3 | In Progress|  |
 | 3. Claude Code & Cursor Adapters | 0/TBD | Not started | - |
 | 4. Honest Stats & Verification | 0/TBD | Not started | - |
 | 5. Profile Compiler & Installer | 0/TBD | Not started | - |

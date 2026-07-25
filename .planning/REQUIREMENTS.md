@@ -26,7 +26,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **MCP-01**: User can run `better-token` MCP shrink proxy that wraps an upstream MCP server and compresses `description` fields in `tools/list`, `prompts/list`, and `resources/list`
 - [x] **MCP-02**: Proxy leaves request payloads and `tools/call` responses untouched
-- [ ] **MCP-03**: On parse errors, proxy falls back to pass-through (no data loss)
+- [x] **MCP-03**: On parse errors, proxy falls back to pass-through (no data loss)
 - [x] **MCP-04**: User can configure which fields are compressed via environment variables
 
 ### Adapters & L2 Style
@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-03 | Phase 1 | Complete |
 | MCP-01 | Phase 2 | Complete |
 | MCP-02 | Phase 2 | Complete |
-| MCP-03 | Phase 2 | Pending |
+| MCP-03 | Phase 2 | Complete |
 | MCP-04 | Phase 2 | Complete |
 | ADAPT-01 | Phase 3 | Pending |
 | ADAPT-02 | Phase 3 | Pending |
