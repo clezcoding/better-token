@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { parseProxyConfig } from "../../src/config.js";
+import { parseProxyConfig, parseShrinkFields } from "../../src/config.js";
 
 const DEFAULT_FIELDS = [
   "tools.description",
@@ -23,6 +23,31 @@ function captureStderr(): { writes: string[]; restore: () => void } {
     restore: () => spy.mockRestore(),
   };
 }
+
+describe("parseShrinkFields", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("MCP-04: tools.description only yields single-field allowlist", () => {
+    const fields = parseShrinkFields("tools.description");
+    expect(fields.size).toBe(1);
+    expect(fields.has("tools.description")).toBe(true);
+    expect(fields.has("prompts.description")).toBe(false);
+    expect(fields.has("resources.description")).toBe(false);
+  });
+
+  it("D-12: mixed valid+invalid falls back to full D-09 defaults via parseShrinkFields", () => {
+    const { writes, restore } = captureStderr();
+    try {
+      const fields = parseShrinkFields("tools.description,garbage");
+      expect(fields).toEqual(new Set(DEFAULT_FIELDS));
+      expect(writes.join("")).toContain(INVALID_FIELDS_WARNING);
+    } finally {
+      restore();
+    }
+  });
+});
 
 describe("parseProxyConfig", () => {
   const baseInput = {
