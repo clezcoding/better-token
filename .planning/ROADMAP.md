@@ -16,7 +16,7 @@
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: L1 Compression Engine & Validator** - Deterministic rule/memory file compression with byte-exact validation gate and rollback (completed 2026-07-24)
-- [ ] **Phase 2: MCP Shrink Proxy** - Universal stdio proxy that compresses tool/prompt/resource descriptions across any MCP-capable IDE
+- [x] **Phase 2: MCP Shrink Proxy** - Universal stdio proxy that compresses tool/prompt/resource descriptions across any MCP-capable IDE (completed 2026-07-25)
 - [ ] **Phase 3: Claude Code & Cursor Adapters** - Deep Tier A hooks and Tier B rules with per-turn L2 style re-injection and carve-out resume
 - [ ] **Phase 4: Honest Stats & Verification** - L3 measurement of input/output savings, framework overhead, net, and verbosity recompress
 - [ ] **Phase 5: Profile Compiler & Installer** - Canonical L4 profile compiled to all targets, one-command auto-detect install, privacy-enforced OSS core
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. L1 Compression Engine & Validator | 3/3 | Complete    | 2026-07-24 |
-| 2. MCP Shrink Proxy | 4/4 | In Progress|  |
+| 2. MCP Shrink Proxy | 4/4 | Complete    | 2026-07-25 |
 | 3. Claude Code & Cursor Adapters | 0/TBD | Not started | - |
 | 4. Honest Stats & Verification | 0/TBD | Not started | - |
 | 5. Profile Compiler & Installer | 0/TBD | Not started | - |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 02
-current_phase_name: mcp-shrink-proxy
-status: nyquist_validated
-stopped_at: VALIDATION.md nyquist_compliant — ready for phase transition
-last_updated: "2026-07-25T05:06:28.807Z"
+current_phase: 3
+current_phase_name: Claude Code & Cursor Adapters
+status: planning
+stopped_at: Phase 02 complete, ready to plan Phase 3
+last_updated: "2026-07-25T05:56:30.000Z"
 last_activity: 2026-07-25
-last_activity_desc: Phase 02 execution started
+last_activity_desc: Phase 02 complete, transitioned to Phase 3
 progress:
-  total_phases: 2
+  total_phases: 5
   completed_phases: 2
   total_plans: 7
   completed_plans: 7
@@ -20,26 +20,26 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-24)
+See: .planning/PROJECT.md (updated 2026-07-25)
 Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignored)
 
 **Core value:** Deterministic, byte-verified input/context compression that cuts tokens without substance loss — every time, not only when the model cooperates.
-**Current focus:** Phase 02 — mcp-shrink-proxy
+**Current focus:** Phase 3 — Claude Code & Cursor Adapters
 
 ## Current Position
 
-Phase: 02 (mcp-shrink-proxy) — NYQUIST VALIDATED
-Plan: 2 of 4
-Status: UAT + SECURITY + VALIDATION complete; ready to transition to Phase 03
-Last activity: 2026-07-25 — Phase 02 execution started
+Phase: 3 — Claude Code & Cursor Adapters
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-25 — Phase 02 complete, transitioned to Phase 3
 
-Progress: [██████████] 100% (Phase 1 done; Phase 2 planned)
+Progress: [████░░░░░░] 40% (Phase 1–2 done; Phase 3 next)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 7
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -53,6 +53,7 @@ Progress: [██████████] 100% (Phase 1 done; Phase 2 planned)
 | 4. Honest Stats & Verification | 0 | — | — |
 | 5. Profile Compiler & Installer | 0 | — | — |
 | 01 | 3 | - | - |
+| 02 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -105,8 +106,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3 will need deeper research into Claude Code hook payloads and `hookSpecificOutput` behavior during compaction (flagged in research/SUMMARY.md)
-- Phase 2 research complete; stream-buffering pitfalls documented in 02-RESEARCH.md
+- [Phase 3] Deeper research into Claude Code hook payloads and `hookSpecificOutput` behavior during compaction (flagged in research/SUMMARY.md)
+- [Phase 2→3] shrink-mcp depends on built `@better-token/core` dist — rebuild core before shrink-mcp unit tests that exercise L1 patterns
 
 ### Quick Tasks Completed
 
@@ -125,7 +126,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T05:06:28.801Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-07-25T05:56:30Z
+Stopped at: Phase 02 complete, ready to plan Phase 3
 Resume file: None
 PR: https://github.com/clezcoding/better-token/pull/1
