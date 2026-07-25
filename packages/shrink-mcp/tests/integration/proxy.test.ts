@@ -17,14 +17,16 @@ interface ProxySession {
   upstreamStdinBytes: Buffer[];
 }
 
-function startProxySession(): Promise<ProxySession> {
+function startProxySession(
+  envOverrides: Record<string, string> = {},
+): Promise<ProxySession> {
   return new Promise((resolvePromise, reject) => {
     const proxy = spawn(
       "npx",
       ["tsx", cliPath, "proxy", "--", "npx", "tsx", mockUpstreamPath],
       {
         cwd: repoRoot,
-        env: process.env,
+        env: { ...process.env, ...envOverrides },
         stdio: ["pipe", "pipe", "pipe"],
       },
     );
@@ -212,6 +214,83 @@ describe("MCP shrink proxy integration", () => {
       killSession(session);
     }
   },
+    15000,
+  );
+
+  it(
+    "MCP-04: BETTER_TOKEN_SHRINK_FIELDS=tools.description shrinks tools only",
+    async () => {
+      const session = await startProxySession({
+        BETTER_TOKEN_SHRINK_FIELDS: "tools.description",
+      });
+
+      try {
+        sendJsonRpc(session, {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2024-11-05",
+            capabilities: {},
+            clientInfo: { name: "test", version: "0" },
+          },
+        });
+
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 1;
+          } catch {
+            return false;
+          }
+        });
+
+        sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+        const toolsLine = await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 2;
+          } catch {
+            return false;
+          }
+        });
+        const toolsMsg = JSON.parse(toolsLine) as {
+          result: { tools: Array<{ description: string }> };
+        };
+        expect(toolsMsg.result.tools[0]!.description.length).toBeLessThan(
+          LONG_DESCRIPTION.length,
+        );
+        expect(toolsMsg.result.tools[0]!.description).not.toBe(LONG_DESCRIPTION);
+
+        sendJsonRpc(session, { jsonrpc: "2.0", id: 3, method: "prompts/list" });
+        const promptsLine = await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 3;
+          } catch {
+            return false;
+          }
+        });
+        const promptsMsg = JSON.parse(promptsLine) as {
+          result: { prompts: Array<{ description: string }> };
+        };
+        expect(promptsMsg.result.prompts[0]!.description).toBe(LONG_DESCRIPTION);
+
+        sendJsonRpc(session, { jsonrpc: "2.0", id: 4, method: "resources/list" });
+        const resourcesLine = await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 4;
+          } catch {
+            return false;
+          }
+        });
+        const resourcesMsg = JSON.parse(resourcesLine) as {
+          result: { resources: Array<{ description: string }> };
+        };
+        expect(resourcesMsg.result.resources[0]!.description).toBe(
+          LONG_DESCRIPTION,
+        );
+      } finally {
+        killSession(session);
+      }
+    },
     15000,
   );
 
