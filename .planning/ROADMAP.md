@@ -69,7 +69,7 @@ Plans:
   3. `tools/call` request payloads and responses pass through byte-identical — no mutation, no data loss
   4. When the proxy hits a parse error it falls back to pass-through, and the user can configure which fields are compressed via environment variables
 
-**Plans**: 3/3 plans executed
+**Plans**: 3/4 plans executed
 
 Plans:
 **Wave 1**
@@ -83,6 +83,10 @@ Plans:
 **Wave 3** *(blocked on Wave 2)*
 
 - [x] 02-03-PLAN.md — Parse-error pass-through + exit/debug hardening + IDE verify (MCP-03)
+
+**Wave 4** *(gap closure G-02-2)*
+
+- [ ] 02-04-PLAN.md — L1 MCP technical prose patterns + filesystem corpus fixture + dual demo config (MCP-01)
 
 ### Phase 3: Claude Code & Cursor Adapters
 
