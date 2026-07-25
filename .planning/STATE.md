@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 3
 current_phase_name: Claude Code & Cursor Adapters
-status: planning
+status: "Phase 02 shipped — PR #17"
 stopped_at: Phase 02 complete, ready to plan Phase 3
-last_updated: "2026-07-25T05:56:30.000Z"
+last_updated: "2026-07-25T06:04:26.063Z"
 last_activity: 2026-07-25
-last_activity_desc: Phase 02 complete, transitioned to Phase 3
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 7
   completed_plans: 7
+last_activity_desc: Phase 02 complete, transitioned to Phase 3
 ---
 
 # Project State
@@ -30,8 +30,8 @@ Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignor
 
 Phase: 3 — Claude Code & Cursor Adapters
 Plan: Not started
-Status: Ready to plan
-Last activity: 2026-07-25 — Phase 02 complete, transitioned to Phase 3
+Status: Phase 02 shipped — PR #17
+Last activity: 2026-07-25
 
 Progress: [████░░░░░░] 40% (Phase 1–2 done; Phase 3 next)
 
