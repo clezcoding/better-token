@@ -15,23 +15,39 @@ concurrency:
 
 jobs:
   build-and-test:
-    if: hashFiles('package.json') != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Detect package.json
+        id: pkg
+        run: |
+          if [ -f package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node.js
+        if: steps.pkg.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
+        if: steps.pkg.outputs.exists == 'true'
         run: npm ci
 
       - name: Build
+        if: steps.pkg.outputs.exists == 'true'
         run: npm run build
 
       - name: Test
+        if: steps.pkg.outputs.exists == 'true'
         run: npm test
+
+      - name: Skip notice
+        if: steps.pkg.outputs.exists != 'true'
+        run: echo "No package.json yet — build-and-test check reports success (placeholder until app code lands on main)."
