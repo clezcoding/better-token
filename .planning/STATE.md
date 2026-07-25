@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 2 — MCP Shrink Proxy
 Plan: Not started
 Status: Phase 01 shipped — PR #1 (rebase onto main)
-Last activity: 2026-07-25 - Completed quick task 260725-a0s: labels/CI PR + Dependabot security remediation
+Last activity: 2026-07-25 - Completed quick task 260725-a9t: CodeQL ReDoS fixes
 
 Progress: [██████████] 100%
 
@@ -100,6 +100,7 @@ None yet.
 | 260725-1my | Fix .gitignore + GitHub CI/automation stack + verify GSD Cursor config | 2026-07-25 | 22a9bdc | [260725-1my-task-1-fix-gitignore-so-only-relevant-fi](./quick/260725-1my-task-1-fix-gitignore-so-only-relevant-fi/) |
 | 260725-1x5 | Branch protection on main via gh CLI + land prior CI on main | 2026-07-25 | 91a24ae | [260725-1x5-set-up-github-branch-protection-on-main-](./quick/260725-1x5-set-up-github-branch-protection-on-main-/) |
 | 260725-a0s | PR: labels+automerge+CI + fix all Dependabot security alerts (vitest 4.1.10) | 2026-07-25 | a5b05f5 | [260725-a0s-push-labels-automerge-ci-branch-as-pr-th](./quick/260725-a0s-push-labels-automerge-ci-branch-as-pr-th/) |
+| 260725-a9t | Fix CodeQL polynomial ReDoS (#1-6) + local tree integrity audit | 2026-07-25 | b20b5b5 | [260725-a9t-fix-all-code-scanning-security-issues-th](./quick/260725-a9t-fix-all-code-scanning-security-issues-th/) |
 
 ## Deferred Items
 
