@@ -14,16 +14,29 @@ const LONG_DESCRIPTION =
 interface ProxySession {
   child: ChildProcessWithoutNullStreams;
   stdoutLines: string[];
+  stderrChunks: string[];
   upstreamStdinBytes: Buffer[];
 }
 
 function startProxySession(
+  upstreamFixture = "mock-upstream.ts",
   envOverrides: Record<string, string> = {},
+  cliArgs: string[] = [],
 ): Promise<ProxySession> {
   return new Promise((resolvePromise, reject) => {
+    const upstreamPath = resolve(__dirname, "../fixtures", upstreamFixture);
     const proxy = spawn(
       "npx",
-      ["tsx", cliPath, "proxy", "--", "npx", "tsx", mockUpstreamPath],
+      [
+        "tsx",
+        cliPath,
+        "proxy",
+        ...cliArgs,
+        "--",
+        "npx",
+        "tsx",
+        upstreamPath,
+      ],
       {
         cwd: repoRoot,
         env: { ...process.env, ...envOverrides },
@@ -34,6 +47,7 @@ function startProxySession(
     const session: ProxySession = {
       child: proxy,
       stdoutLines: [],
+      stderrChunks: [],
       upstreamStdinBytes: [],
     };
 
@@ -51,11 +65,19 @@ function startProxySession(
       }
     });
 
+    proxy.stderr.on("data", (chunk: Buffer) => {
+      session.stderrChunks.push(chunk.toString("utf8"));
+    });
+
     proxy.on("error", reject);
 
     // Give proxy time to spawn upstream
     setTimeout(() => resolvePromise(session), 500);
   });
+}
+
+function sessionStderr(session: ProxySession): string {
+  return session.stderrChunks.join("");
 }
 
 function sendJsonRpc(
@@ -359,4 +381,374 @@ describe("MCP shrink proxy integration", () => {
   },
     15000,
   );
+});
+
+describe("MCP-03 parse pass-through", () => {
+  it(
+    "MCP-03: invalid JSON line passes through unchanged and valid list still shrinks",
+    async () => {
+      const session = await startProxySession("mock-upstream-bad-line.ts");
+
+      try {
+        sendJsonRpc(session, {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2024-11-05",
+            capabilities: {},
+            clientInfo: { name: "test", version: "0" },
+          },
+        });
+
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 1;
+          } catch {
+            return false;
+          }
+        });
+
+        sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+
+        await waitForStdoutLine(session, (line) => line === "NOT VALID JSON LINE");
+
+        const toolsLine = await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 2;
+          } catch {
+            return false;
+          }
+        });
+
+        const toolsMsg = JSON.parse(toolsLine) as {
+          result: { tools: Array<{ description: string }> };
+        };
+        expect(toolsMsg.result.tools[0]!.description.length).toBeLessThan(
+          LONG_DESCRIPTION.length,
+        );
+
+        const stderr = sessionStderr(session);
+        const passThroughLines = stderr
+          .split("\n")
+          .filter((l) => l.includes("pass-through") && l.includes("parse"));
+        expect(passThroughLines).toHaveLength(1);
+      } finally {
+        killSession(session);
+      }
+    },
+    15000,
+  );
+
+  it(
+    "D-13: parse-error notice appears even when debug is false",
+    async () => {
+      const session = await startProxySession("mock-upstream-bad-line.ts", {
+        BETTER_TOKEN_DEBUG: "0",
+      });
+
+      try {
+        sendJsonRpc(session, {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2024-11-05",
+            capabilities: {},
+            clientInfo: { name: "test", version: "0" },
+          },
+        });
+
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 1;
+          } catch {
+            return false;
+          }
+        });
+
+        sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+        await waitForStdoutLine(session, (line) => line === "NOT VALID JSON LINE");
+
+        expect(sessionStderr(session)).toMatch(/pass-through.*parse/i);
+      } finally {
+        killSession(session);
+      }
+    },
+    15000,
+  );
+});
+
+describe("D-14 debug shrink stats", () => {
+  it(
+    "D-14: with debug enabled stderr shows estimated before/after token figures",
+    async () => {
+      const session = await startProxySession(
+        "mock-upstream.ts",
+        { BETTER_TOKEN_DEBUG: "1" },
+        ["--debug"],
+      );
+
+      try {
+        sendJsonRpc(session, {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2024-11-05",
+            capabilities: {},
+            clientInfo: { name: "test", version: "0" },
+          },
+        });
+
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 1;
+          } catch {
+            return false;
+          }
+        });
+
+        sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 2;
+          } catch {
+            return false;
+          }
+        });
+
+        const stderr = sessionStderr(session);
+        expect(stderr).toMatch(/estimated before:/i);
+        expect(stderr).toMatch(/estimated after:/i);
+        expect(session.stdoutLines.every((l) => !l.includes("estimated before"))).toBe(
+          true,
+        );
+      } finally {
+        killSession(session);
+      }
+    },
+    15000,
+  );
+
+  it(
+    "D-14: with debug disabled no shrink-success stats on stderr",
+    async () => {
+      const session = await startProxySession("mock-upstream.ts", {
+        BETTER_TOKEN_DEBUG: "0",
+      });
+
+      try {
+        sendJsonRpc(session, {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2024-11-05",
+            capabilities: {},
+            clientInfo: { name: "test", version: "0" },
+          },
+        });
+
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 1;
+          } catch {
+            return false;
+          }
+        });
+
+        sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 2;
+          } catch {
+            return false;
+          }
+        });
+
+        await new Promise((r) => setTimeout(r, 300));
+        expect(sessionStderr(session)).not.toMatch(/estimated before:/i);
+        expect(sessionStderr(session)).not.toMatch(/estimated after:/i);
+      } finally {
+        killSession(session);
+      }
+    },
+    15000,
+  );
+});
+
+describe("D-15 upstream exit propagation", () => {
+  it(
+    "D-15: proxy exits with upstream non-zero code and stderr mentions exit",
+    async () => {
+      const session = await startProxySession("mock-upstream-exit7.ts");
+
+      try {
+        sendJsonRpc(session, {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2024-11-05",
+            capabilities: {},
+            clientInfo: { name: "test", version: "0" },
+          },
+        });
+
+        await waitForStdoutLine(session, (line) => {
+          try {
+            return (JSON.parse(line) as { id?: number }).id === 1;
+          } catch {
+            return false;
+          }
+        });
+
+        const exitCode = await new Promise<number>((resolvePromise) => {
+          session.child.on("exit", (code) => resolvePromise(code ?? -1));
+        });
+
+        expect(exitCode).toBe(7);
+        expect(sessionStderr(session)).toMatch(/upstream exited with code 7/i);
+      } finally {
+        killSession(session);
+      }
+    },
+    15000,
+  );
+});
+
+describe("batch and framing edge cases", () => {
+  it("batch JSON-RPC array passes through original line unchanged", async () => {
+    const session = await startProxySession("mock-upstream-batch.ts");
+
+    try {
+      sendJsonRpc(session, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "0" },
+        },
+      });
+
+      await waitForStdoutLine(session, (line) => {
+        try {
+          return (JSON.parse(line) as { id?: number }).id === 1;
+        } catch {
+          return false;
+        }
+      });
+
+      sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+      const batchLine = await waitForStdoutLine(session, (line) => {
+        try {
+          const parsed = JSON.parse(line) as unknown;
+          return Array.isArray(parsed);
+        } catch {
+          return false;
+        }
+      });
+
+      const reparsed = JSON.parse(batchLine) as unknown[];
+      expect(reparsed).toHaveLength(2);
+      expect(reparsed[0]).toMatchObject({ id: 2, result: { tools: expect.any(Array) } });
+      expect(reparsed[1]).toMatchObject({
+        method: "notifications/tools/list_changed",
+      });
+      expect(
+        (reparsed[0] as { result: { tools: Array<{ description: string }> } })
+          .result.tools[0]!.description,
+      ).toBe(LONG_DESCRIPTION);
+    } finally {
+      killSession(session);
+    }
+  });
+
+  it("partial trailing line without newline flushes on upstream close", async () => {
+    const session = await startProxySession("mock-upstream-partial-close.ts");
+
+    try {
+      sendJsonRpc(session, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "0" },
+        },
+      });
+
+      await waitForStdoutLine(session, (line) => {
+        try {
+          return (JSON.parse(line) as { id?: number }).id === 1;
+        } catch {
+          return false;
+        }
+      });
+
+      sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+
+      const partialLine = await waitForStdoutLine(
+        session,
+        (line) => line.startsWith('{"jsonrpc":"2.0"') && !line.endsWith("}"),
+        8000,
+      );
+
+      expect(partialLine.length).toBeGreaterThan(10);
+      expect(() => JSON.parse(partialLine)).toThrow();
+    } finally {
+      killSession(session);
+    }
+  });
+
+  it("nextCursor preserved on paginated tools/list while descriptions shrink", async () => {
+    const session = await startProxySession("mock-upstream-paginated.ts");
+
+    try {
+      sendJsonRpc(session, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "0" },
+        },
+      });
+
+      await waitForStdoutLine(session, (line) => {
+        try {
+          return (JSON.parse(line) as { id?: number }).id === 1;
+        } catch {
+          return false;
+        }
+      });
+
+      sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+      const toolsLine = await waitForStdoutLine(session, (line) => {
+        try {
+          return (JSON.parse(line) as { id?: number }).id === 2;
+        } catch {
+          return false;
+        }
+      });
+
+      const toolsMsg = JSON.parse(toolsLine) as {
+        result: {
+          nextCursor: string;
+          tools: Array<{ description: string }>;
+        };
+      };
+      expect(toolsMsg.result.nextCursor).toBe("page-2-token-abc123");
+      expect(toolsMsg.result.tools[0]!.description.length).toBeLessThan(
+        LONG_DESCRIPTION.length,
+      );
+    } finally {
+      killSession(session);
+    }
+  });
 });

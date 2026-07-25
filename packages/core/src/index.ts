@@ -1,4 +1,11 @@
+import { encode } from "bpe-lite";
+
 export type CompressionMode = "safe" | "balanced" | "aggressive";
+
+/** BPE-lite token estimate for shrink diagnostics (D-14). */
+export function estimateTokenCount(text: string): number {
+  return encode(text).length;
+}
 
 export interface TokenMap {
   [key: string]: string;

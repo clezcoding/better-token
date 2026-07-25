@@ -19,6 +19,21 @@ describe("NdjsonReadBuffer", () => {
     expect(buffer.flush()).toBe('{"partial":');
     expect(buffer.flush()).toBeUndefined();
   });
+
+  it("accumulates partial chunks until newline then flush emits remainder", () => {
+    const buffer = new NdjsonReadBuffer();
+    expect(buffer.push('{"a":1,')).toEqual([]);
+    expect(buffer.push('"b":2')).toEqual([]);
+    expect(buffer.push("\n")).toEqual(['{"a":1,"b":2}']);
+    buffer.push('{"tail":true');
+    expect(buffer.flush()).toBe('{"tail":true');
+  });
+
+  it("flush after partial without newline returns full buffered bytes", () => {
+    const buffer = new NdjsonReadBuffer();
+    buffer.push('not-json-partial');
+    expect(buffer.flush()).toBe("not-json-partial");
+  });
 });
 
 describe("writeNdjsonLine", () => {
