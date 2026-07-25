@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 3
 current_phase_name: Claude Code & Cursor Adapters
-status: "Phase 02 shipped — PR #17"
-stopped_at: Phase 02 complete, ready to plan Phase 3
-last_updated: "2026-07-25T06:04:26.063Z"
+status: "Quick 260725-bhw complete — Dependabot fixes"
+stopped_at: Completed quick-260725-bhw (Dependabot vitest/vite/esbuild fixes)
+last_updated: "2026-07-25T06:20:15Z"
 last_activity: 2026-07-25
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 7
   completed_plans: 7
-last_activity_desc: Phase 02 complete, transitioned to Phase 3
+last_activity_desc: Quick task 260725-bhw complete — Dependabot vitest/vite/esbuild fixes
 ---
 
 # Project State
@@ -31,7 +31,7 @@ Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignor
 Phase: 3 — Claude Code & Cursor Adapters
 Plan: Not started
 Status: Phase 02 shipped — PR #17
-Last activity: 2026-07-25
+Last activity: 2026-07-25 — Quick 260725-bhw Dependabot fixes shipped locally
 
 Progress: [████░░░░░░] 40% (Phase 1–2 done; Phase 3 next)
 
@@ -99,6 +99,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Partial trailing NDJSON flushed as pass-through on upstream close
 - [Phase ?]: BALANCED_MCP_PATTERNS strip filesystem MCP scope suffix, preamble, qualifiers in balanced mode (G-02-2)
 - [Phase ?]: Dual mcp.json: live filesystem proxy + local mock-upstream-filesystem demo
+- [Quick 260725-bhw]: shrink-mcp vitest ^4.1.10 (align core); no root overrides; Dependabot never dismiss
 
 ### Pending Todos
 
@@ -115,6 +116,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260725-1my | Fix .gitignore + GitHub CI/automation stack + verify GSD Cursor config | 2026-07-25 | 22a9bdc | [260725-1my-task-1-fix-gitignore-so-only-relevant-fi](./quick/260725-1my-task-1-fix-gitignore-so-only-relevant-fi/) |
 | 260725-1x5 | Branch protection on main via gh CLI + land prior CI on main | 2026-07-25 | 91a24ae | [260725-1x5-set-up-github-branch-protection-on-main-](./quick/260725-1x5-set-up-github-branch-protection-on-main-/) |
+| 260725-bhw | Fix all Dependabot alerts (shrink-mcp vitest→^4.1.10, lockfile clean) | 2026-07-25 | e6cd22c | [260725-bhw-fix-all-dependabot-alerts-and-github-sec](./quick/260725-bhw-fix-all-dependabot-alerts-and-github-sec/) |
 
 ## Deferred Items
 
@@ -126,7 +128,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T05:56:30Z
-Stopped at: Phase 02 complete, ready to plan Phase 3
+Last session: 2026-07-25T06:20:15Z
+Stopped at: Completed quick-260725-bhw (Dependabot vitest/vite/esbuild fixes)
 Resume file: None
 PR: https://github.com/clezcoding/better-token/pull/1
