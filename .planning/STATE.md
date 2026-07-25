@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: mcp-shrink-proxy
-status: verifying
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-07-25T03:50:21.856Z"
+status: executing
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-07-25T05:06:28.807Z"
 last_activity: 2026-07-25
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
 ---
 
 # Project State
@@ -29,8 +29,8 @@ Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignor
 ## Current Position
 
 Phase: 02 (mcp-shrink-proxy) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-07-25 — Phase 02 execution started
 
 Progress: [██████████] 100% (Phase 1 done; Phase 2 planned)
@@ -70,6 +70,7 @@ Progress: [██████████] 100% (Phase 1 done; Phase 2 planned)
 | Phase 02 P01 | 6 | 2 tasks | 15 files |
 | Phase 02-mcp-shrink-proxy P02 | 2 | 2 tasks | 4 files |
 | Phase 02-mcp-shrink-proxy P03 | 10min | 2 tasks | 9 files |
+| Phase 02 P04 | 2min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Parse-error stderr always-on regardless of debug (D-13); shrink stats gated on BETTER_TOKEN_DEBUG (D-14/D-16)
 - [Phase ?]: Batch JSON-RPC arrays pass through unchanged without shrink (A2)
 - [Phase ?]: Partial trailing NDJSON flushed as pass-through on upstream close
+- [Phase ?]: BALANCED_MCP_PATTERNS strip filesystem MCP scope suffix, preamble, qualifiers in balanced mode (G-02-2)
+- [Phase ?]: Dual mcp.json: live filesystem proxy + local mock-upstream-filesystem demo
 
 ### Pending Todos
 
@@ -122,7 +125,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T03:50:21.851Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-07-25T05:06:28.801Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
 PR: https://github.com/clezcoding/better-token/pull/1
