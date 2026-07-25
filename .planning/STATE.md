@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: MCP Shrink Proxy
 status: shipped
-stopped_at: "Phase 01 shipped — PR #1"
-last_updated: "2026-07-24T22:53:30.147Z"
-last_activity: 2026-07-24
+stopped_at: Phase 2 context gathered
+last_updated: "2026-07-25T03:15:38.022Z"
+last_activity: 2026-07-25
+last_activity_desc: PRD renamed to better-token; linked from GSD docs
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
   total_plans: 3
   completed_plans: 3
-last_activity_desc: Phase 01 shipped — PR #1
 ---
 
 # Project State
@@ -21,6 +21,7 @@ last_activity_desc: Phase 01 shipped — PR #1
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-07-24)
+Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignored)
 
 **Core value:** Deterministic, byte-verified input/context compression that cuts tokens without substance loss — every time, not only when the model cooperates.
 **Current focus:** Phase 2 — MCP Shrink Proxy
@@ -30,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 2 — MCP Shrink Proxy
 Plan: Not started
 Status: Phase 01 shipped — PR #1 (rebase onto main)
-Last activity: 2026-07-25 - Rebased Phase 01 onto main (CI + branch protection landed)
+Last activity: 2026-07-25 - PRD renamed to better-token; linked from GSD docs
 
 Progress: [██████████] 100%
 
@@ -110,7 +111,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25
-Stopped at: Phase 01 PR #1 rebased onto main (awaiting merge)
-Resume file: .planning/.continue-here.md
+Last session: 2026-07-25T03:15:38.015Z
+Stopped at: Phase 2 context gathered
+Resume file: .planning/phases/02-mcp-shrink-proxy/02-CONTEXT.md
 PR: https://github.com/clezcoding/better-token/pull/1
