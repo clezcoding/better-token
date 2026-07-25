@@ -55,6 +55,15 @@ const BALANCED_FILLERS: RegExp[] = [
   /Actually/gi,
 ];
 
+const BALANCED_MCP_PATTERNS: RegExp[] = [
+  /\s*Only works within allowed directories\.?/gi,
+  /Use this tool when you need to /gi,
+  /This tool is (essential|useful|perfect) for /gi,
+  /Read the complete contents of /gi,
+  / from the file system/gi,
+  /Get a detailed listing of /gi,
+];
+
 // Nonce suffixes are lowercase hex; allow a-f so aggressive merge preserves tokens.
 const PLACEHOLDER_REGEX = /__[A-Z][A-Za-f0-9]*(?:_[A-Za-f0-9]+)*__/;
 
@@ -103,6 +112,22 @@ function compressSafe(prose: string): string {
   return normalizeWhitespace(withFillers);
 }
 
+function applyMcpPatterns(text: string): string {
+  let result = text;
+  for (const pattern of BALANCED_MCP_PATTERNS) {
+    result = result.replace(pattern, (match) => {
+      if (/^Read the complete contents of /i.test(match)) {
+        return "Read ";
+      }
+      if (/^Get a detailed listing of /i.test(match)) {
+        return "List ";
+      }
+      return "";
+    });
+  }
+  return result;
+}
+
 function compressBalanced(prose: string): string {
   if (!prose) {
     return prose;
@@ -110,7 +135,11 @@ function compressBalanced(prose: string): string {
   const withFillers = processLinesPreservingPlaceholders(prose, (line) =>
     applyFillers(line, BALANCED_FILLERS),
   );
-  return normalizeWhitespace(withFillers);
+  const withMcpPatterns = processLinesPreservingPlaceholders(
+    withFillers,
+    (line) => applyMcpPatterns(line),
+  );
+  return normalizeWhitespace(withMcpPatterns);
 }
 
 function compactAdjacentBullets(text: string): string {

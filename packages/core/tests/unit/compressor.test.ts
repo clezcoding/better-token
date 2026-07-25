@@ -197,4 +197,20 @@ describe("Compressor", () => {
     expect(output).toMatch(/2\. Second step/);
     expect(output).toMatch(/3\. Third step/);
   });
+
+  it("G-02-2: balanced shortens filesystem scope suffix", () => {
+    const input =
+      "Read a file and return it as base64. Only works within allowed directories.";
+    const output = compressProse(input, "balanced");
+    expect(output).not.toContain("Only works within allowed directories");
+    expect(output.length).toBeLessThan(input.length);
+  });
+
+  it("G-02-2: balanced shortens Use this tool preamble", () => {
+    const input =
+      "Use this tool when you need to examine the contents of a single file.";
+    const output = compressProse(input, "balanced");
+    expect(output).not.toContain("Use this tool when you need to");
+    expect(output).toContain("examine the contents of a single file");
+  });
 });
