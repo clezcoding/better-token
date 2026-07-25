@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace=@better-token/core && npm run build --workspace=@better-token/shrink-mcp",
-    "test": "npm run test --workspace=@better-token/core && npm run test --workspace=@better-token/shrink-mcp",
+    "build": "npm run build --workspace=@better-token/shrink-mcp && npm run build --workspace=@better-token/core",
+    "test": "npm run build --workspace=@better-token/shrink-mcp && npm run test --workspace=@better-token/core && npm run test --workspace=@better-token/shrink-mcp",
     "dev": "npm run dev --workspace=@better-token/core"
   }
 }

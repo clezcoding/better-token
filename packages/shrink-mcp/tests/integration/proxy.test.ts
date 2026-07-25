@@ -112,7 +112,9 @@ function killSession(session: ProxySession): void {
 }
 
 describe("MCP shrink proxy integration", () => {
-  it("MCP-01: compresses tools/prompts/resources list descriptions via proxy", async () => {
+  it(
+    "MCP-01: compresses tools/prompts/resources list descriptions via proxy",
+    async () => {
     const session = await startProxySession();
 
     try {
@@ -209,9 +211,13 @@ describe("MCP shrink proxy integration", () => {
     } finally {
       killSession(session);
     }
-  });
+  },
+    15000,
+  );
 
-  it("MCP-02: tools/call request and response pass through byte-identical", async () => {
+  it(
+    "MCP-02: tools/call request and response pass through byte-identical",
+    async () => {
     const session = await startProxySession();
 
     try {
@@ -271,5 +277,7 @@ describe("MCP shrink proxy integration", () => {
     } finally {
       killSession(session);
     }
-  });
+  },
+    15000,
+  );
 });

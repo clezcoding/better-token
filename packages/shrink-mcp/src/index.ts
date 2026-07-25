@@ -6,4 +6,5 @@ export {
   MIN_DESCRIPTION_LENGTH,
   compressDescription,
   shrinkListResponse,
+  isShrinkableListResponse,
 } from "./shrink.js";
