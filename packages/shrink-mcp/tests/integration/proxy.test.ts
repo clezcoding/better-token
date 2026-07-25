@@ -6,7 +6,6 @@ import { describe, it, expect } from "vitest";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../../../..");
 const cliPath = resolve(repoRoot, "packages/core/src/cli.ts");
-const mockUpstreamPath = resolve(__dirname, "../fixtures/mock-upstream.ts");
 
 const LONG_DESCRIPTION =
   "I would be happy to help you with this tool for debugging purposes and general assistance in your workflow.";
@@ -242,7 +241,7 @@ describe("MCP shrink proxy integration", () => {
   it(
     "MCP-04: BETTER_TOKEN_SHRINK_FIELDS=tools.description shrinks tools only",
     async () => {
-      const session = await startProxySession({
+      const session = await startProxySession("mock-upstream.ts", {
         BETTER_TOKEN_SHRINK_FIELDS: "tools.description",
       });
 

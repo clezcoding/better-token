@@ -1,16 +1,34 @@
+import { estimateTokenCount } from "@better-token/core";
 import { spawn } from "node:child_process";
 import type { ProxyConfig } from "./config.js";
 import { NdjsonReadBuffer, writeNdjsonLine } from "./framing.js";
 import { isShrinkableListResponse, shrinkListResponse } from "./shrink.js";
+
+const PARSE_PASS_THROUGH_MSG =
+  "better-token proxy: pass-through: parse error\n";
+
+function emitShrinkStats(
+  beforeJson: string,
+  afterJson: string,
+  config: ProxyConfig,
+): void {
+  if (!config.debug || beforeJson === afterJson) {
+    return;
+  }
+
+  const before = estimateTokenCount(beforeJson);
+  const after = estimateTokenCount(afterJson);
+  process.stderr.write(
+    `better-token proxy: shrink estimated before: ${before} estimated after: ${after}\n`,
+  );
+}
 
 function handleUpstreamLine(line: string, config: ProxyConfig): void {
   let parsed: unknown;
   try {
     parsed = JSON.parse(line);
   } catch {
-    if (config.debug) {
-      process.stderr.write("better-token proxy: pass-through parse error on upstream line\n");
-    }
+    process.stderr.write(PARSE_PASS_THROUGH_MSG);
     writeNdjsonLine(process.stdout, line);
     return;
   }
@@ -25,12 +43,15 @@ function handleUpstreamLine(line: string, config: ProxyConfig): void {
     parsed !== null &&
     isShrinkableListResponse(parsed as Record<string, unknown>, config.shrinkFields)
   ) {
+    const beforeJson = JSON.stringify(parsed);
     const shrunk = shrinkListResponse(
       parsed as Record<string, unknown>,
       config.shrinkFields,
       config.mode,
     );
-    writeNdjsonLine(process.stdout, JSON.stringify(shrunk));
+    const afterJson = JSON.stringify(shrunk);
+    emitShrinkStats(beforeJson, afterJson, config);
+    writeNdjsonLine(process.stdout, afterJson);
     return;
   }
 
@@ -69,7 +90,14 @@ export function runProxy(config: ProxyConfig): Promise<number> {
         return;
       }
 
-      resolvePromise(code ?? 0);
+      const exitCode = code ?? 0;
+      if (exitCode !== 0) {
+        process.stderr.write(
+          `better-token proxy: upstream exited with code ${exitCode}\n`,
+        );
+      }
+
+      resolvePromise(exitCode);
     });
 
     upstream.on("error", (err) => {

@@ -23,8 +23,7 @@ describe("NdjsonReadBuffer", () => {
   it("accumulates partial chunks until newline then flush emits remainder", () => {
     const buffer = new NdjsonReadBuffer();
     expect(buffer.push('{"a":1,')).toEqual([]);
-    expect(buffer.push('"b":2')).toEqual([]);
-    expect(buffer.push("\n")).toEqual(['{"a":1,"b":2}']);
+    expect(buffer.push('"b":2}\n')).toEqual(['{"a":1,"b":2}']);
     buffer.push('{"tail":true');
     expect(buffer.flush()).toBe('{"tail":true');
   });
