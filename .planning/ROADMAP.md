@@ -141,7 +141,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. L1 Compression Engine & Validator | 3/3 | Complete    | 2026-07-24 |
-| 2. MCP Shrink Proxy | 0/TBD | Not started | - |
+| 2. MCP Shrink Proxy | 0/3 | Planned | - |
 | 3. Claude Code & Cursor Adapters | 0/TBD | Not started | - |
 | 4. Honest Stats & Verification | 0/TBD | Not started | - |
 | 5. Profile Compiler & Installer | 0/TBD | Not started | - |
