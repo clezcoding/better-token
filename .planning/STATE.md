@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: mcp-shrink-proxy
-status: security_verified
-stopped_at: SECURITY.md verified threats_open:0 — ready for validate/transition
+status: nyquist_validated
+stopped_at: VALIDATION.md nyquist_compliant — ready for phase transition
 last_updated: "2026-07-25T05:06:28.807Z"
 last_activity: 2026-07-25
 last_activity_desc: Phase 02 execution started
@@ -28,9 +28,9 @@ Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignor
 
 ## Current Position
 
-Phase: 02 (mcp-shrink-proxy) — SECURITY VERIFIED
+Phase: 02 (mcp-shrink-proxy) — NYQUIST VALIDATED
 Plan: 2 of 4
-Status: UAT 3/3 + SECURITY verified (threats_open:0); next /gsd-validate-phase 02 or transition
+Status: UAT + SECURITY + VALIDATION complete; ready to transition to Phase 03
 Last activity: 2026-07-25 — Phase 02 execution started
 
 Progress: [██████████] 100% (Phase 1 done; Phase 2 planned)
