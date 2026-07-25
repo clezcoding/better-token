@@ -1,4 +1,5 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, it, expect } from "vitest";
@@ -6,6 +7,21 @@ import { describe, it, expect } from "vitest";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../../../..");
 const cliPath = resolve(repoRoot, "packages/core/src/cli.ts");
+const filesystemFixturePath = resolve(
+  repoRoot,
+  "packages/core/tests/fixtures/filesystem-tools-descriptions.json",
+);
+const filesystemCorpus = JSON.parse(
+  readFileSync(filesystemFixturePath, "utf-8"),
+) as Array<{ name: string; description: string }>;
+
+function sumDescriptionChars(descriptions: string[]): number {
+  return descriptions.reduce((sum, d) => sum + d.length, 0);
+}
+
+const filesystemBaselineChars = sumDescriptionChars(
+  filesystemCorpus.map((t) => t.description),
+);
 
 const LONG_DESCRIPTION =
   "I would be happy to help you with this tool for debugging purposes and general assistance in your workflow.";
@@ -746,6 +762,54 @@ describe("batch and framing edge cases", () => {
       expect(toolsMsg.result.tools[0]!.description.length).toBeLessThan(
         LONG_DESCRIPTION.length,
       );
+    } finally {
+      killSession(session);
+    }
+  });
+
+  it("G-02-2: proxy shrinks filesystem corpus mock upstream", async () => {
+    const session = await startProxySession("mock-upstream-filesystem.ts");
+
+    try {
+      sendJsonRpc(session, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "0" },
+        },
+      });
+
+      await waitForStdoutLine(session, (line) => {
+        try {
+          return (JSON.parse(line) as { id?: number }).id === 1;
+        } catch {
+          return false;
+        }
+      });
+
+      sendJsonRpc(session, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+      const toolsLine = await waitForStdoutLine(session, (line) => {
+        try {
+          return (JSON.parse(line) as { id?: number }).id === 2;
+        } catch {
+          return false;
+        }
+      });
+
+      const toolsMsg = JSON.parse(toolsLine) as {
+        result: { tools: Array<{ description: string }> };
+      };
+      const shrunkChars = sumDescriptionChars(
+        toolsMsg.result.tools.map((t) => t.description),
+      );
+      const savingsPct =
+        ((filesystemBaselineChars - shrunkChars) / filesystemBaselineChars) *
+        100;
+      expect(shrunkChars).toBeLessThan(filesystemBaselineChars);
+      expect(savingsPct).toBeGreaterThanOrEqual(8);
     } finally {
       killSession(session);
     }

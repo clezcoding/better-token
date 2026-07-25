@@ -1,10 +1,24 @@
 import { describe, it, expect, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import * as coreModule from "@better-token/core";
 import {
   MIN_DESCRIPTION_LENGTH,
   compressDescription,
   shrinkListResponse,
 } from "../../src/shrink.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const fixturePath = resolve(
+  __dirname,
+  "../../../core/tests/fixtures/filesystem-tools-descriptions.json",
+);
+const filesystemCorpus = JSON.parse(
+  readFileSync(fixturePath, "utf-8"),
+) as Array<{ name: string; description: string }>;
+const READ_TEXT_FILE_DESCRIPTION =
+  filesystemCorpus.find((t) => t.name === "read_text_file")!.description;
 
 const LONG_DESCRIPTION =
   "I would be happy to help you with this tool for debugging purposes and general assistance in your workflow.";
@@ -29,6 +43,18 @@ describe("compressDescription", () => {
     expect(exact.length).toBe(MIN_DESCRIPTION_LENGTH);
     const { text } = compressDescription(exact, "balanced");
     expect(text.length).toBeLessThanOrEqual(exact.length);
+  });
+
+  it("G-02-2: compresses technical filesystem-style description", () => {
+    expect(READ_TEXT_FILE_DESCRIPTION.length).toBeGreaterThanOrEqual(
+      MIN_DESCRIPTION_LENGTH,
+    );
+    const { text, changed } = compressDescription(
+      READ_TEXT_FILE_DESCRIPTION,
+      "balanced",
+    );
+    expect(changed).toBe(true);
+    expect(text.length).toBeLessThan(READ_TEXT_FILE_DESCRIPTION.length);
   });
 });
 
