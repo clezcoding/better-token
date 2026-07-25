@@ -2,6 +2,7 @@
 
 **Defined:** 2026-07-24
 **Core Value:** Deterministic, byte-verified input/context compression that cuts tokens without substance loss — every time, not only when the model cooperates.
+**Source PRD:** [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignored)
 
 ## v1 Requirements
 
@@ -23,8 +24,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### MCP Shrink Proxy
 
-- [ ] **MCP-01**: User can run `better-token` MCP shrink proxy that wraps an upstream MCP server and compresses `description` fields in `tools/list`, `prompts/list`, and `resources/list`
-- [ ] **MCP-02**: Proxy leaves request payloads and `tools/call` responses untouched
+- [x] **MCP-01**: User can run `better-token` MCP shrink proxy that wraps an upstream MCP server and compresses `description` fields in `tools/list`, `prompts/list`, and `resources/list`
+- [x] **MCP-02**: Proxy leaves request payloads and `tools/call` responses untouched
 - [ ] **MCP-03**: On parse errors, proxy falls back to pass-through (no data loss)
 - [ ] **MCP-04**: User can configure which fields are compressed via environment variables
 
@@ -99,8 +100,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-01 | Phase 1 | Complete |
 | SAFE-02 | Phase 1 | Complete |
 | SAFE-03 | Phase 1 | Complete |
-| MCP-01 | Phase 2 | Pending |
-| MCP-02 | Phase 2 | Pending |
+| MCP-01 | Phase 2 | Complete |
+| MCP-02 | Phase 2 | Complete |
 | MCP-03 | Phase 2 | Pending |
 | MCP-04 | Phase 2 | Pending |
 | ADAPT-01 | Phase 3 | Pending |

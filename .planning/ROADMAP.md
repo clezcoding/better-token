@@ -69,12 +69,12 @@ Plans:
   3. `tools/call` request payloads and responses pass through byte-identical — no mutation, no data loss
   4. When the proxy hits a parse error it falls back to pass-through, and the user can configure which fields are compressed via environment variables
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — Transparent stdio proxy + list-description shrink (MCP-01, MCP-02)
+- [x] 02-01-PLAN.md — Transparent stdio proxy + list-description shrink (MCP-01, MCP-02)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -141,7 +141,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. L1 Compression Engine & Validator | 3/3 | Complete    | 2026-07-24 |
-| 2. MCP Shrink Proxy | 0/3 | Planned | - |
+| 2. MCP Shrink Proxy | 1/3 | In Progress|  |
 | 3. Claude Code & Cursor Adapters | 0/TBD | Not started | - |
 | 4. Honest Stats & Verification | 0/TBD | Not started | - |
 | 5. Profile Compiler & Installer | 0/TBD | Not started | - |

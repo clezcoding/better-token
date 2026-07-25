@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 2
-current_phase_name: MCP Shrink Proxy
-status: ready_to_execute
-stopped_at: Phase 2 plans revised after checker feedback
-last_updated: "2026-07-25T05:28:00.000Z"
+current_phase: 02
+current_phase_name: mcp-shrink-proxy
+status: executing
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-07-25T03:36:41.717Z"
 last_activity: 2026-07-25
-last_activity_desc: Phase 2 plans revised (Nyquist RED verify, D-12 mixed tokens, Open Questions RESOLVED)
+last_activity_desc: Phase 02 execution started
 progress:
-  total_phases: 5
+  total_phases: 2
   completed_phases: 1
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -24,16 +24,16 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignored)
 
 **Core value:** Deterministic, byte-verified input/context compression that cuts tokens without substance loss — every time, not only when the model cooperates.
-**Current focus:** Phase 2 — MCP Shrink Proxy
+**Current focus:** Phase 02 — mcp-shrink-proxy
 
 ## Current Position
 
-Phase: 2 — MCP Shrink Proxy
-Plan: 02-01 / 02-02 / 02-03 ready (post-checker revision)
-Status: Plans revised — ready for `/gsd-execute-phase 2`
-Last activity: 2026-07-25 - Checker blockers fixed (RED automated, D-12, RESEARCH RESOLVED, graphify)
+Phase: 02 (mcp-shrink-proxy) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-07-25 — Phase 02 execution started
 
-Progress: [█████░░░░░] 50% (Phase 1 done; Phase 2 planned)
+Progress: [███████░░░] 67% (Phase 1 done; Phase 2 planned)
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [█████░░░░░] 50% (Phase 1 done; Phase 2 planned)
 | Phase 01-l1-compression-engine-validator P01 | 8 | 4 tasks | 22 files |
 | Phase 01-l1-compression-engine-validator P02 | 4 | 2 tasks | 6 files |
 | Phase 01-l1-compression-engine-validator P03 | 4 | 2 tasks | 5 files |
+| Phase 02 P01 | 6 | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Mode switch reads original from sidecar, never stacks compression (D-13)
 - [Phase ?]: Aggressive merge skips __CARVEOUT_ blocks to preserve byte-exact carve-out boundaries
 - [Phase ?]: BETTER_TOKEN_TEST_TTY=1 hook enables D-17 subprocess integration tests
+- [Phase ?]: Upstream argv parsed from process.argv after -- (Commander strips separator from command.args)
+- [Phase ?]: Workspace deps use file: protocol because npm 11 rejected workspace:* in this environment
 
 ### Pending Todos
 
@@ -111,7 +114,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T05:28:00.000Z
-Stopped at: Phase 2 plans revised after checker feedback — ready to execute
-Resume file: .planning/phases/02-mcp-shrink-proxy/02-01-PLAN.md
+Last session: 2026-07-25T03:36:41.712Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None
 PR: https://github.com/clezcoding/better-token/pull/1
