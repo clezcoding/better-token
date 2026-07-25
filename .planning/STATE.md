@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 
 Phase: 2 — MCP Shrink Proxy
 Plan: Not started
-Status: Phase 01 shipped — PR #1
-Last activity: 2026-07-24
+Status: Phase 01 shipped — PR #1 (rebase onto main)
+Last activity: 2026-07-25 - Rebased Phase 01 onto main (CI + branch protection landed)
 
 Progress: [██████████] 100%
 
@@ -93,6 +93,13 @@ None yet.
 - Phase 3 will need deeper research into Claude Code hook payloads and `hookSpecificOutput` behavior during compaction (flagged in research/SUMMARY.md)
 - Phase 2 will need research into stdio JSON-RPC stream buffering to avoid stream-draining regressions
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260725-1my | Fix .gitignore + GitHub CI/automation stack + verify GSD Cursor config | 2026-07-25 | 22a9bdc | [260725-1my-task-1-fix-gitignore-so-only-relevant-fi](./quick/260725-1my-task-1-fix-gitignore-so-only-relevant-fi/) |
+| 260725-1x5 | Branch protection on main via gh CLI + land prior CI on main | 2026-07-25 | 91a24ae | [260725-1x5-set-up-github-branch-protection-on-main-](./quick/260725-1x5-set-up-github-branch-protection-on-main-/) |
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -103,7 +110,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T22:55:00Z
-Stopped at: Phase 01 shipped — PR #1
+Last session: 2026-07-25
+Stopped at: Phase 01 PR #1 rebased onto main (awaiting merge)
 Resume file: .planning/.continue-here.md
 PR: https://github.com/clezcoding/better-token/pull/1
