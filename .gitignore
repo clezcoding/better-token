@@ -21,6 +21,7 @@ coverage/
 # planning noise
 .planning/research/.cache/
 .planning/**/HANDOFF.json
+better-token-prd.md
 
 # logs / misc
 *.log

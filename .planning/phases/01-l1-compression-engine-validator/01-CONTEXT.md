@@ -60,7 +60,7 @@ Users can compress rule/memory files deterministically (no LLM), switch `safe` /
 - `.planning/REQUIREMENTS.md` — COMP-01..05, SAFE-01..03 (Phase 1 traceability)
 - `.planning/ROADMAP.md` — Phase 1 goal, success criteria, requirement mapping
 - `.planning/STATE.md` — current position and init decisions
-- `Tokenwise-PRD.md` — FR-1.x compression/idempotency/backup intent; `invented_abbreviations` ban; prior art notes
+- `better-token-prd.md` — FR-1.x compression/idempotency/backup intent; `invented_abbreviations` ban; prior art notes (repo root, gitignored)
 
 ### Research (implementation guidance, not user locks)
 - `.planning/research/SUMMARY.md` — Phase 1 delivers tokenizer + heuristics + validator in `packages/core`
