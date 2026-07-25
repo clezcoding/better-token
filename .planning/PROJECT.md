@@ -21,19 +21,18 @@ Deterministic, byte-verified input/context compression that cuts tokens without 
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Deterministic rule/memory file compression with byte-exact validation gate (code, inline code, URLs, paths, headings preserved) — Validated in Phase 1: L1 Compression Engine & Validator
+- [x] Switchable L1 aggression modes: `safe` / `balanced` / `aggressive` (default `balanced`); validator always on — Validated in Phase 1: L1 Compression Engine & Validator
+- [x] Security carve-outs: never compress code, exact errors, security warnings, irreversible confirmations — Validated in Phase 1: L1 Compression Engine & Validator
 
 ### Active
 
-- [ ] Deterministic rule/memory file compression with byte-exact validation gate (code, inline code, URLs, paths, headings preserved)
-- [ ] Switchable L1 aggression modes: `safe` / `balanced` / `aggressive` (default `balanced`); validator always on
 - [ ] MCP shrink proxy that compresses tool/prompt/resource `description` fields only; pass-through on parse errors
 - [ ] Claude Code adapter with per-turn style injection (Tier A hooks) for output terseness
 - [ ] Cursor adapter (always-apply rule + MCP) as second depth target
 - [ ] Honest stats: measured vs estimated usage; separate input savings, output savings, framework overhead, net (including negative net)
 - [ ] One-command install with agent auto-detect; re-run safe; dry-run / uninstall
 - [ ] Canonical profile → adapter compiler (single source of truth, no hand-duplicated agent configs)
-- [ ] Security carve-outs: never compress code, exact errors, security warnings, irreversible confirmations
 - [ ] OSS defaults: no backend, no telemetry, offline-capable core; docs in English; MIT license
 
 ### Out of Scope
@@ -108,5 +107,9 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+## Current State
+
+Phase 1 complete — `@better-token/core` ships `compress` / `rollback` / `validate` with three modes, `.original` sidecar, and byte-exact validator (65 tests green). Next: Phase 2 MCP Shrink Proxy.
+
 ---
-*Last updated: 2026-07-24 after initialization*
+*Last updated: 2026-07-24 after Phase 1 completion*

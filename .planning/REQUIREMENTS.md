@@ -9,17 +9,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### L1 Compression
 
-- [ ] **COMP-01**: User can compress rule/memory files (`CLAUDE.md`, `.cursorrules`, `AGENTS.md`, `GEMINI.md`, and equivalents) with a deterministic heuristic engine (no LLM rewrite)
-- [ ] **COMP-02**: User can select L1 aggression mode `safe`, `balanced`, or `aggressive` (default `balanced`); validator remains on in every mode
-- [ ] **COMP-03**: User can run compression with `--dry-run` to see token delta without writing files
-- [ ] **COMP-04**: Repeated compression is idempotent (already-compressed files detected; no further change)
-- [ ] **COMP-05**: Original file is saved as `.original` (or equivalent) and user can roll back to it
+- [x] **COMP-01**: User can compress rule/memory files (`CLAUDE.md`, `.cursorrules`, `AGENTS.md`, `GEMINI.md`, and equivalents) with a deterministic heuristic engine (no LLM rewrite)
+- [x] **COMP-02**: User can select L1 aggression mode `safe`, `balanced`, or `aggressive` (default `balanced`); validator remains on in every mode
+- [x] **COMP-03**: User can run compression with `--dry-run` to see token delta without writing files
+- [x] **COMP-04**: Repeated compression is idempotent (already-compressed files detected; no further change)
+- [x] **COMP-05**: Original file is saved as `.original` (or equivalent) and user can roll back to it
 
 ### Safety & Validation
 
-- [ ] **SAFE-01**: After every compression, a byte-exact validator asserts code blocks, inline code, URLs, paths, and headings are identical; on failure compression is discarded and original kept
-- [ ] **SAFE-02**: System never compresses: code blocks, inline code, exact error strings, commit/PR messages, security warnings, irreversible-action confirmations, or multi-step sequences where order risk is high
-- [ ] **SAFE-03**: User language is preserved — compression never translates content
+- [x] **SAFE-01**: After every compression, a byte-exact validator asserts code blocks, inline code, URLs, paths, and headings are identical; on failure compression is discarded and original kept
+- [x] **SAFE-02**: System never compresses: code blocks, inline code, exact error strings, commit/PR messages, security warnings, irreversible-action confirmations, or multi-step sequences where order risk is high
+- [x] **SAFE-03**: User language is preserved — compression never translates content
 
 ### MCP Shrink Proxy
 
@@ -91,14 +91,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| COMP-01 | Phase 1 | Pending |
-| COMP-02 | Phase 1 | Pending |
-| COMP-03 | Phase 1 | Pending |
-| COMP-04 | Phase 1 | Pending |
-| COMP-05 | Phase 1 | Pending |
-| SAFE-01 | Phase 1 | Pending |
-| SAFE-02 | Phase 1 | Pending |
-| SAFE-03 | Phase 1 | Pending |
+| COMP-01 | Phase 1 | Complete |
+| COMP-02 | Phase 1 | Complete |
+| COMP-03 | Phase 1 | Complete |
+| COMP-04 | Phase 1 | Complete |
+| COMP-05 | Phase 1 | Complete |
+| SAFE-01 | Phase 1 | Complete |
+| SAFE-02 | Phase 1 | Complete |
+| SAFE-03 | Phase 1 | Complete |
 | MCP-01 | Phase 2 | Pending |
 | MCP-02 | Phase 2 | Pending |
 | MCP-03 | Phase 2 | Pending |
@@ -119,6 +119,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRIV-01 | Phase 5 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 26 total
 - Mapped to phases: 26
 - Unmapped: 0 ✓

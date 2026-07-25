@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "target": "ES2022",
+    "paths": {
+      "@better-token/core": ["./packages/core/src"]
+    }
+  },
+  "references": [
+    { "path": "./packages/core" }
+  ]
+}
