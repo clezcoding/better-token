@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 1 of 5 (L1 Compression Engine & Validator)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
-Last activity: 2026-07-25 - Completed quick task 260725-1my: Fix .gitignore + GitHub automation + GSD config verify
+Last activity: 2026-07-25 - Completed quick task 260725-1x5: Branch protection on main via gh CLI
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -75,6 +75,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260725-1my | Fix .gitignore + GitHub CI/automation stack + verify GSD Cursor config | 2026-07-25 | 22a9bdc | [260725-1my-task-1-fix-gitignore-so-only-relevant-fi](./quick/260725-1my-task-1-fix-gitignore-so-only-relevant-fi/) |
+| 260725-1x5 | Branch protection on main via gh CLI + land prior CI on main | 2026-07-25 | 91a24ae | [260725-1x5-set-up-github-branch-protection-on-main-](./quick/260725-1x5-set-up-github-branch-protection-on-main-/) |
 
 ## Deferred Items
 
@@ -87,5 +88,5 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-07-25
-Stopped at: Completed quick task 260725-1my (gitignore + GitHub automation)
+Stopped at: Completed quick task 260725-1x5 (branch protection via gh)
 Resume file: None
