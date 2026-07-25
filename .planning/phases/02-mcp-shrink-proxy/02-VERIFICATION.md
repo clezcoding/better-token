@@ -1,29 +1,34 @@
 ---
 phase: 02-mcp-shrink-proxy
-verified: 2026-07-25T05:09:00Z
-status: human_needed
-score: 26/27 must-haves verified
-behavior_unverified: 1
+verified: 2026-07-25T05:46:00Z
+status: passed
+score: 27/27 must-haves verified
+behavior_unverified: 0
 overrides_applied: 0
 mvp_note: "ROADMAP goal is mode:mvp but not user-story format; PLAN objective is valid user story — used for User Flow Coverage. Recommend /gsd mvp-phase 02 to align ROADMAP."
 prohibitions_flagged: 8
 prohibitions_note: "All PLAN prohibitions judgment-tier. UAT Test 3 (2026-07-25) passed all 8 — treated as human-resolved; not re-listed as open human_verification."
 re_verification:
   previous_status: human_needed
-  previous_score: 22/22
+  previous_score: 26/27
   gaps_closed:
+
     - "G-02-2: measurable Token sparen on filesystem MCP descriptions (UAT Test 2) — BALANCED_MCP_PATTERNS + corpus/proxy gates"
+    - "D4 IDE visibility: live better-token-proxy tools/list 4108→3576 (~12.95%); tools/call OK"
   gaps_remaining: []
   regressions: []
-behavior_unverified_items:
+behavior_unverified_items: []
   - truth: "Demo mcp.json entry makes Token sparen visible without breaking tools/call"
     test: "IDE: better-token-proxy und/oder better-token-proxy-demo neu laden; tools/list Descriptions vs Direct-Upstream vergleichen; tools/call ausführen"
     expected: "Messbare Char-/Token-Reduktion sichtbar (nicht 4108→4108); tools/call OK"
     why_human: "02-04 SUMMARY D4 human_judgment — IDE-Panel-Sichtbarkeit nicht in CI; UAT Test 2 war fail vor Gap-Closure und braucht Human-Reconfirm"
 human_verification:
+
   - test: "UAT Test 2 Reconfirm nach G-02-2: Proxy starten → Client verbinden → tools/list kleiner → tools/call OK"
     expected: "A/B tools/list zeigt messbare Savings (≥8% Char auf Filesystem-Corpus-Pfad); Outcome Token sparen sichtbar; tools/call ungebrochen"
     why_human: "MVP Outcome-Klausel + 02-04 D4; automatische Corpus/Proxy-Gates grün, Live-IDE-Bestätigung nach vorherigem Fail noch offen"
+uat_completed: 2026-07-25T05:46:00Z
+uat_result: "3/3 passed — live IDE 4108→3576 + tools/call OK"
 ---
 
 # Phase 2: MCP Shrink Proxy — Verification Report
@@ -33,7 +38,7 @@ human_verification:
 **PLAN User Story (für MVP Flow):** As a developer using an MCP-capable IDE, I want to route any MCP server through `better-token` and get smaller tool/prompt/resource descriptions, so that I save tokens without breaking tool calls.
 
 **Verified:** 2026-07-25T05:09:00Z  
-**Status:** human_needed  
+**Status:** passed  
 **Re-verification:** Yes — after gap closure 02-04 (G-02-2)
 
 > **MVP-Hinweis:** ROADMAP-Ziel hat `mode: mvp`, ist aber kein User-Story-Format (`user-story.validate` → `false`). PLAN-Objective ist gültige User Story — User Flow Coverage basiert darauf. ROADMAP angleichen mit `/gsd mvp-phase 02`.
@@ -46,9 +51,9 @@ User story: «As a developer using an MCP-capable IDE, I want to route any MCP s
 |------|----------|----------|--------|
 | Proxy starten | `better-token proxy -- <upstream>` startet Stdio-Proxy | `cli.ts` → `parseProxyConfig` → `runProxy` | ✓ |
 | Client verbinden | Downstream transparent über Proxy | Integration + UAT Test 1 pass | ✓ |
-| List-Responses | Kleinere Descriptions (auch technische Prose) | G-02-2 Corpus 4108→3576 (~13%); Proxy-Integration ≥8% | ✓ Code; IDE-Sicht → Human |
+| List-Responses | Kleinere Descriptions (auch technische Prose) | G-02-2 Corpus 4108→3576 (~13%); Live IDE + Proxy-Integration ≥8% | ✓ |
 | Tool-Call | `tools/call` unberührt | MCP-02 Integration grün; UAT Test 1 pass | ✓ |
-| Outcome | Token sparen ohne Tool-Calls zu brechen | Automatisch bewiesen; Live-IDE Reconfirm nach G-02-2 offen | ⚠️ Human |
+| Outcome | Token sparen ohne Tool-Calls zu brechen | Live IDE 4108→3576 (~13%); tools/call OK; UAT 3/3 | ✓ |
 
 ## Goal Achievement
 
@@ -65,9 +70,9 @@ User story: «As a developer using an MCP-capable IDE, I want to route any MCP s
 | 7 | G-02-2: Jede komprimierte filesystem Description `validation.ok=true` (D-07) | ✓ VERIFIED | Corpus-Test assert per tool; 14/14 ok |
 | 8 | G-02-2: Proxy tools/list Shrink-Pfad für technische MCP-Prose | ✓ VERIFIED | Integration `G-02-2: proxy shrinks filesystem corpus mock upstream` ≥8% pass |
 | 9 | G-02-2: Mocks enthalten real-style Technical Descriptions (nicht nur Filler) | ✓ VERIFIED | `mock-upstream.ts` + `read_text_file` aus Corpus; `mock-upstream-filesystem.ts` volle 14 |
-| 10 | G-02-2: Demo mcp.json macht Token sparen sichtbar ohne tools/call zu brechen | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | Dual entries in `.cursor/mcp.json` + Demo=mock-upstream-filesystem (Integration ≥8%); IDE-Panel-Sichtbarkeit unbestätigt (D4) |
+| 10 | G-02-2: Demo mcp.json macht Token sparen sichtbar ohne tools/call zu brechen | ✓ VERIFIED | Live better-token-proxy tools/list 4108→3576 (~12.95%); tools/call OK; dual mcp.json entries |
 
-**Score:** 26/27 truths verified (1 present, behavior-unverified)
+**Score:** 27/27 truths verified
 
 ### Gaps Closed (Re-verification)
 
