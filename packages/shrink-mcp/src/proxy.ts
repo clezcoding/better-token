@@ -1,5 +1,6 @@
 import { estimateTokenCount } from "@better-token/core";
 import { spawn } from "node:child_process";
+import { StringDecoder } from "node:string_decoder";
 import type { ProxyConfig } from "./config.js";
 import { NdjsonReadBuffer, writeNdjsonLine } from "./framing.js";
 import { isShrinkableListResponse, shrinkListResponse } from "./shrink.js";
@@ -58,6 +59,14 @@ function handleUpstreamLine(line: string, config: ProxyConfig): void {
   writeNdjsonLine(process.stdout, line);
 }
 
+function ignoreStreamError(err: NodeJS.ErrnoException): void {
+  // Upstream closed while client still writing — expected; D-15 handles exit code.
+  if (err.code === "EPIPE" || err.code === "ERR_STREAM_DESTROYED") {
+    return;
+  }
+  process.stderr.write(`better-token proxy: stream error: ${err.message}\n`);
+}
+
 export function runProxy(config: ProxyConfig): Promise<number> {
   const upstream = spawn(config.upstreamCommand, config.upstreamArgs, {
     stdio: ["pipe", "pipe", "pipe"],
@@ -65,44 +74,84 @@ export function runProxy(config: ProxyConfig): Promise<number> {
     shell: false,
   });
 
-  process.stdin.pipe(upstream.stdin!);
+  const upstreamStdin = upstream.stdin!;
+  upstreamStdin.on("error", ignoreStreamError);
+  process.stdin.on("error", ignoreStreamError);
+  process.stdin.pipe(upstreamStdin);
   upstream.stderr?.pipe(process.stderr);
 
   const reader = new NdjsonReadBuffer();
+  const decoder = new StringDecoder("utf8");
   upstream.stdout!.on("data", (chunk: Buffer) => {
-    for (const line of reader.push(chunk.toString("utf8"))) {
+    for (const line of reader.push(decoder.write(chunk))) {
       handleUpstreamLine(line, config);
     }
   });
 
+  const onSignal = (signal: NodeJS.Signals) => {
+    try {
+      upstream.kill(signal);
+    } catch {
+      // child may already be gone
+    }
+  };
+  process.once("SIGINT", onSignal);
+  process.once("SIGTERM", onSignal);
+
   return new Promise((resolvePromise) => {
+    let settled = false;
+    let exitCode = 0;
+    let exitSignal: NodeJS.Signals | null = null;
+
+    const settle = (code: number) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      process.off("SIGINT", onSignal);
+      process.off("SIGTERM", onSignal);
+      resolvePromise(code);
+    };
+
+    // Capture exit code early; wait for `close` so stdio drains before flush/exit.
     upstream.on("exit", (code, signal) => {
+      exitSignal = signal;
+      exitCode = code ?? (signal ? 1 : 0);
+    });
+
+    upstream.on("close", () => {
+      const decodedTail = decoder.end();
+      if (decodedTail) {
+        for (const line of reader.push(decodedTail)) {
+          handleUpstreamLine(line, config);
+        }
+      }
+
       const remainder = reader.flush();
       if (remainder !== undefined) {
         handleUpstreamLine(remainder, config);
       }
 
-      if (signal) {
+      if (exitSignal) {
         process.stderr.write(
-          `better-token proxy: upstream killed by ${signal}\n`,
+          `better-token proxy: upstream killed by ${exitSignal}\n`,
         );
-        resolvePromise(1);
+        settle(1);
         return;
       }
 
-      const exitCode = code ?? 0;
       if (exitCode !== 0) {
         process.stderr.write(
           `better-token proxy: upstream exited with code ${exitCode}\n`,
         );
       }
 
-      resolvePromise(exitCode);
+      settle(exitCode);
     });
 
     upstream.on("error", (err) => {
       process.stderr.write(`better-token proxy: upstream error: ${err.message}\n`);
-      resolvePromise(1);
+      settle(1);
     });
   });
 }

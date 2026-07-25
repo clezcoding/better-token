@@ -33,6 +33,34 @@ describe("NdjsonReadBuffer", () => {
     buffer.push('not-json-partial');
     expect(buffer.flush()).toBe("not-json-partial");
   });
+
+  it("overflow uses UTF-8 byte length and still emits complete lines first", () => {
+    const buffer = new NdjsonReadBuffer();
+    // Buffer a complete line without consuming trailing content yet.
+    expect(buffer.push('{"ok":true}\n')).toEqual(['{"ok":true}']);
+    // Partial ASCII under string-length 4MB, but UTF-8 euros exceed byte cap.
+    buffer.push("x".repeat(1_000_000));
+    const filler = "€".repeat(1_200_000); // pushes past 4MB bytes
+    const stderr: string[] = [];
+    const orig = process.stderr.write.bind(process.stderr);
+    process.stderr.write = ((chunk: string | Uint8Array) => {
+      stderr.push(String(chunk));
+      return true;
+    }) as typeof process.stderr.write;
+
+    try {
+      const lines = buffer.push(filler);
+      expect(stderr.some((s) => s.includes("NDJSON buffer exceeded 4MB"))).toBe(
+        true,
+      );
+      expect(lines.length).toBe(1);
+      expect(lines[0]?.startsWith("x")).toBe(true);
+      expect(lines[0]?.includes("€")).toBe(true);
+      expect(buffer.flush()).toBeUndefined();
+    } finally {
+      process.stderr.write = orig;
+    }
+  });
 });
 
 describe("writeNdjsonLine", () => {
