@@ -1,23 +1,29 @@
 ---
 phase: 02-mcp-shrink-proxy
-verified: 2026-07-25T03:54:58Z
+verified: 2026-07-25T05:09:00Z
 status: human_needed
-score: 22/22 must-haves verified
-behavior_unverified: 0
+score: 26/27 must-haves verified
+behavior_unverified: 1
 overrides_applied: 0
 mvp_note: "ROADMAP goal is mode:mvp but not user-story format; PLAN objective is valid user story — used for User Flow Coverage. Recommend /gsd mvp-phase 02 to align ROADMAP."
 prohibitions_flagged: 8
-prohibitions_note: "All PLAN prohibitions are judgment-tier (flagged:true). LLM-judge: satisfied by code evidence — non-authoritative; human review recommended."
+prohibitions_note: "All PLAN prohibitions judgment-tier. UAT Test 3 (2026-07-25) passed all 8 — treated as human-resolved; not re-listed as open human_verification."
+re_verification:
+  previous_status: human_needed
+  previous_score: 22/22
+  gaps_closed:
+    - "G-02-2: measurable Token sparen on filesystem MCP descriptions (UAT Test 2) — BALANCED_MCP_PATTERNS + corpus/proxy gates"
+  gaps_remaining: []
+  regressions: []
+behavior_unverified_items:
+  - truth: "Demo mcp.json entry makes Token sparen visible without breaking tools/call"
+    test: "IDE: better-token-proxy und/oder better-token-proxy-demo neu laden; tools/list Descriptions vs Direct-Upstream vergleichen; tools/call ausführen"
+    expected: "Messbare Char-/Token-Reduktion sichtbar (nicht 4108→4108); tools/call OK"
+    why_human: "02-04 SUMMARY D4 human_judgment — IDE-Panel-Sichtbarkeit nicht in CI; UAT Test 2 war fail vor Gap-Closure und braucht Human-Reconfirm"
 human_verification:
-  - test: "IDE: better-token proxy vor Upstream eintragen, MCP neu laden, Tools-Liste prüfen, einen tools/call ausführen"
-    expected: "Tools-Liste lädt; Descriptions kürzer; Tool-Call erfolgreich; keine Protokollfehler durch stdout-Pollution"
-    why_human: "Echte IDE-stdio-MCP-Verbindung ist in CI nicht voll automatisierbar (02-03 PLAN human-check)"
-  - test: "User-Flow (MVP): Proxy starten → Client verbinden → List-Responses mit kleineren Descriptions → tools/call unverändert"
-    expected: "Outcome aus User Story: Token sparen ohne Tool-Calls zu brechen"
-    why_human: "MVP User-Flow-Walkthrough erfordert menschliche Bestätigung der sichtbaren Outcome-Klausel"
-  - test: "Judgment-Prohibitions prüfen (8× flagged): keine erfundenen Descriptions; kein stdout-Noise; keine Request-Mutation; kein MCP-SDK; invalid env warnt; nur erlaubte Field-IDs; Parse-Fail = Originalbytes; keine Shrink-Stats ohne debug"
-    expected: "Alle Must-NOTs halten unter manueller/Code-Review-Bestätigung"
-    why_human: "judgment-tier prohibitions — autonomer LLM-Judge nicht autoritativ (ADR-550)"
+  - test: "UAT Test 2 Reconfirm nach G-02-2: Proxy starten → Client verbinden → tools/list kleiner → tools/call OK"
+    expected: "A/B tools/list zeigt messbare Savings (≥8% Char auf Filesystem-Corpus-Pfad); Outcome Token sparen sichtbar; tools/call ungebrochen"
+    why_human: "MVP Outcome-Klausel + 02-04 D4; automatische Corpus/Proxy-Gates grün, Live-IDE-Bestätigung nach vorherigem Fail noch offen"
 ---
 
 # Phase 2: MCP Shrink Proxy — Verification Report
@@ -26,9 +32,9 @@ human_verification:
 
 **PLAN User Story (für MVP Flow):** As a developer using an MCP-capable IDE, I want to route any MCP server through `better-token` and get smaller tool/prompt/resource descriptions, so that I save tokens without breaking tool calls.
 
-**Verified:** 2026-07-25T03:54:58Z  
+**Verified:** 2026-07-25T05:09:00Z  
 **Status:** human_needed  
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — after gap closure 02-04 (G-02-2)
 
 > **MVP-Hinweis:** ROADMAP-Ziel hat `mode: mvp`, ist aber kein User-Story-Format (`user-story.validate` → `false`). PLAN-Objective ist gültige User Story — User Flow Coverage basiert darauf. ROADMAP angleichen mit `/gsd mvp-phase 02`.
 
@@ -38,87 +44,85 @@ User story: «As a developer using an MCP-capable IDE, I want to route any MCP s
 
 | Step | Expected | Evidence | Status |
 |------|----------|----------|--------|
-| Proxy starten | `better-token proxy -- <upstream>` startet Stdio-Proxy | `packages/core/src/cli.ts:471-499` → `parseProxyConfig` → `runProxy` | ✓ |
-| Client verbinden | Downstream-Client spricht transparent mit Upstream über Proxy | Integration: `proxy.test.ts` spawn CLI + mock upstream; `process.stdin.pipe(upstream.stdin)` | ✓ (Protokoll); IDE → Human |
-| List-Responses | `tools/list` / `prompts/list` / `resources/list` mit kompakteren `description` | `shrink.ts` + MCP-01 Integrationstest (grün) | ✓ |
-| Tool-Call | `tools/call` Request/Response unberührt | MCP-02 Integrationstest (grün); raw stdin pipe | ✓ |
-| Outcome | Token sparen ohne Tool-Calls zu brechen | SC2+SC3 Tests + Config MCP-04 | ✓ Code; Outcome-Gefühl → Human |
+| Proxy starten | `better-token proxy -- <upstream>` startet Stdio-Proxy | `cli.ts` → `parseProxyConfig` → `runProxy` | ✓ |
+| Client verbinden | Downstream transparent über Proxy | Integration + UAT Test 1 pass | ✓ |
+| List-Responses | Kleinere Descriptions (auch technische Prose) | G-02-2 Corpus 4108→3576 (~13%); Proxy-Integration ≥8% | ✓ Code; IDE-Sicht → Human |
+| Tool-Call | `tools/call` unberührt | MCP-02 Integration grün; UAT Test 1 pass | ✓ |
+| Outcome | Token sparen ohne Tool-Calls zu brechen | Automatisch bewiesen; Live-IDE Reconfirm nach G-02-2 offen | ⚠️ Human |
 
 ## Goal Achievement
 
 ### Observable Truths
 
-| # | Truth | Status | Evidence |
+| #   | Truth | Status | Evidence |
 | --- | ------- | ---------- | -------------- |
-| 1 | SC1: User startet `better-token` als Stdio-Proxy vor Upstream; Downstream-Client verbindet transparent | ✓ VERIFIED | CLI `proxy` wired; `runProxy` spawn+pipe; Integration MCP-01/02 grün |
-| 2 | SC2: `tools/list`, `prompts/list`, `resources/list` — `description` komprimiert; übrige Felder unverändert | ✓ VERIFIED | Integration MCP-01: name/inputSchema/uri erhalten, description kürzer; nextCursor-Test |
-| 3 | SC3: `tools/call` Request/Response byte-identisch — keine Mutation | ✓ VERIFIED | `stdin.pipe`; Non-List-Pfad schreibt Original-`line`; Test MCP-02 grün |
-| 4 | SC4: Parse-Error → Pass-through; Felder via Env konfigurierbar | ✓ VERIFIED | MCP-03 + D-13 Tests; MCP-04 Config+Integration Tests |
-| 5 | D-02: Upstream-argv nach `--`; `env: process.env` | ✓ VERIFIED | `cli.ts` `extractUpstreamFromArgv`; `proxy.ts:62-66` |
-| 6 | Default-Mode ohne CLI/Env = `balanced` | ✓ VERIFIED | `config.ts` `resolveMode`; Unit-Test „default: balanced mode…“ |
-| 7 | Client→Upstream Requests nie geparst/re-serialisiert | ✓ VERIFIED | `process.stdin.pipe(upstream.stdin!)` — kein JSON-Parse auf Requests |
-| 8 | D-07: `validation.ok === false` behält Original-Description | ✓ VERIFIED | Unit-Test D-07 mit Spy |
-| 9 | D-08: `< 48` unverändert; fehlende/null Descriptions nicht erfunden | ✓ VERIFIED | `MIN_DESCRIPTION_LENGTH`; Unit-Test absent/null/empty |
-| 10 | Boundary length === 48: Compression wird versucht | ✓ VERIFIED | Code `length < 48` skip; Unit-Test exact 48 |
-| 11 | Listen-Item-Reihenfolge bleibt erhalten | ✓ VERIFIED | In-place Mutation in `shrinkItemDescriptions`; D-07 prüft Index 0/1 |
-| 12 | MCP-04: `BETTER_TOKEN_SHRINK_FIELDS` Allowlist wirkt pro List-Typ | ✓ VERIFIED | Unit + Integration MCP-04 |
-| 13 | Unset Fields → D-09 Defaults (alle drei) | ✓ VERIFIED | `parseShrinkFields(undefined)`; Default-Unit-Test |
-| 14 | D-12: invalid/mixed → eine stderr-Warnung + volle Defaults | ✓ VERIFIED | Mehrere D-12 Unit-Tests |
-| 15 | D-06: CLI `--mode` schlägt `BETTER_TOKEN_MODE` | ✓ VERIFIED | Unit D-06/A3 |
-| 16 | Alle Proxy-Env-Vars nutzen `BETTER_TOKEN_*` | ✓ VERIFIED | `BETTER_TOKEN_SHRINK_FIELDS`, `_MODE`, `_DEBUG` in `config.ts` |
-| 17 | Leeres/whitespace `BETTER_TOKEN_SHRINK_FIELDS` → D-12 | ✓ VERIFIED | Unit empty/whitespace Tests |
-| 18 | MCP-03/D-13: Parse-Fail → Originalzeile + stderr (auch ohne debug) | ✓ VERIFIED | Integration MCP-03 + D-13 |
-| 19 | D-14/D-16: Shrink-Stats nur bei debug; nie auf stdout | ✓ VERIFIED | D-14 Integration Tests |
-| 20 | D-15: Upstream non-zero Exit → Proxy gleicher Code + stderr | ✓ VERIFIED | D-15 Integration (exit 7) |
-| 21 | JSON-RPC Batch-Arrays pass-through unverändert | ✓ VERIFIED | Batch Integrationstest |
-| 22 | Partial trailing / mid-line Flush ohne stilles Droppen | ✓ VERIFIED | Framing Unit-Tests + partial-close Integration |
+| 1 | SC1: Stdio-Proxy vor Upstream; Downstream verbindet transparent | ✓ VERIFIED | CLI `proxy` wired; UAT Test 1 pass; Integration spawn+pipe |
+| 2 | SC2: List-Responses — `description` komprimiert; übrige Felder unverändert | ✓ VERIFIED | MCP-01 Integration + G-02-2: technische Prose messbar kleiner (nicht nur Filler) |
+| 3 | SC3: `tools/call` Request/Response byte-identisch | ✓ VERIFIED | MCP-02 named test pass (re-run 2026-07-25) |
+| 4 | SC4: Parse-Error → Pass-through; Felder via Env | ✓ VERIFIED | MCP-03/D-13 + MCP-04 Config (Prior + keine Regression in 02-04) |
+| 5 | D-02…D-16 + Framing/Batch (Prior truths 5–22) | ✓ VERIFIED | Quick regression: artifacts exist, wiring intact, no TBD/FIXME in phase runtime |
+| 6 | G-02-2: Balanced L1 schrumpft echte filesystem MCP Descriptions messbar (nicht 4108→4108) | ✓ VERIFIED | Live: 4108→3576 (~12.95%), 9/14 changed; `mcp-descriptions.test.ts` pass |
+| 7 | G-02-2: Jede komprimierte filesystem Description `validation.ok=true` (D-07) | ✓ VERIFIED | Corpus-Test assert per tool; 14/14 ok |
+| 8 | G-02-2: Proxy tools/list Shrink-Pfad für technische MCP-Prose | ✓ VERIFIED | Integration `G-02-2: proxy shrinks filesystem corpus mock upstream` ≥8% pass |
+| 9 | G-02-2: Mocks enthalten real-style Technical Descriptions (nicht nur Filler) | ✓ VERIFIED | `mock-upstream.ts` + `read_text_file` aus Corpus; `mock-upstream-filesystem.ts` volle 14 |
+| 10 | G-02-2: Demo mcp.json macht Token sparen sichtbar ohne tools/call zu brechen | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | Dual entries in `.cursor/mcp.json` + Demo=mock-upstream-filesystem (Integration ≥8%); IDE-Panel-Sichtbarkeit unbestätigt (D4) |
 
-**Score:** 22/22 truths verified (0 present, behavior-unverified)
+**Score:** 26/27 truths verified (1 present, behavior-unverified)
+
+### Gaps Closed (Re-verification)
+
+| Gap | Prior | Now | Evidence |
+|-----|-------|-----|----------|
+| G-02-2 UAT Test 2 — 0% Savings auf filesystem MCP | failed | closed (code+tests) | `BALANCED_MCP_PATTERNS` in `compressor.ts`; Corpus+Proxy Gates grün |
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 | -------- | ----------- | ------ | ------- |
-| `packages/shrink-mcp/package.json` | Workspace-Paket | ✓ VERIFIED | `@better-token/shrink-mcp`, dep auf core |
-| `packages/shrink-mcp/src/framing.ts` | NdjsonReadBuffer + writeNdjsonLine | ✓ VERIFIED | Substantiv; Unit-Tests |
-| `packages/shrink-mcp/src/shrink.ts` | compressDescription + shrinkListResponse | ✓ VERIFIED | Wired zu core validator |
-| `packages/shrink-mcp/src/proxy.ts` | runProxy | ✓ VERIFIED | Spawn, pipe, shrink, pass-through |
-| `packages/shrink-mcp/src/config.ts` | ProxyConfig + parseProxyConfig | ✓ VERIFIED | Full env merge (nicht Stub) |
-| `packages/core/src/cli.ts` | `proxy` Subcommand | ✓ VERIFIED | Import runProxy/parseProxyConfig |
-| `packages/shrink-mcp/tests/fixtures/mock-upstream.ts` | Mock Upstream | ✓ VERIFIED | + bad-line/batch/exit/partial/paginated |
-| `packages/shrink-mcp/tests/integration/proxy.test.ts` | MCP-01..04 Coverage | ✓ VERIFIED | 35/35 Suite grün |
-| `packages/shrink-mcp/tests/unit/config.test.ts` | MCP-04 Coverage | ✓ VERIFIED | D-12/D-06 grün |
+| `packages/shrink-mcp/package.json` | Workspace-Paket | ✓ VERIFIED | Prior + exists |
+| `packages/shrink-mcp/src/framing.ts` | NdjsonReadBuffer | ✓ VERIFIED | Prior |
+| `packages/shrink-mcp/src/shrink.ts` | compressDescription + shrinkListResponse | ✓ VERIFIED | Import `compressMarkdownWithValidation` L2–16 |
+| `packages/shrink-mcp/src/proxy.ts` | runProxy | ✓ VERIFIED | Prior |
+| `packages/shrink-mcp/src/config.ts` | parseProxyConfig | ✓ VERIFIED | Prior |
+| `packages/core/src/cli.ts` | `proxy` Subcommand | ✓ VERIFIED | `runProxy` L17, L492–498 |
+| `packages/shrink-mcp/tests/fixtures/mock-upstream.ts` | Mock + technical prose | ✓ VERIFIED | echo filler + `read_text_file` aus Corpus |
+| `packages/shrink-mcp/tests/integration/proxy.test.ts` | MCP-01..04 + G-02-2 | ✓ VERIFIED | G-02-2 Integration vorhanden |
+| `packages/core/tests/fixtures/filesystem-tools-descriptions.json` | 14-tool Corpus | ✓ VERIFIED | 14 tools, 4108 chars baseline |
+| `packages/core/src/compressor.ts` | BALANCED_MCP_PATTERNS | ✓ VERIFIED | L58–65, applied in `compressBalanced` L131–142 |
+| `packages/shrink-mcp/tests/fixtures/mock-upstream-filesystem.ts` | Full corpus mock | ✓ VERIFIED | 64 lines, serves fixture |
+| `.cursor/mcp.json` | Dual demo entries | ✓ VERIFIED | `better-token-proxy` + `better-token-proxy-demo` |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | ---- | --- | --- | ------ | ------- |
-| `cli.ts` proxy action | `runProxy` | `parseProxyConfig → runProxy` | ✓ WIRED | `cli.ts:17,492-499` |
-| `shrinkListResponse` | `compressMarkdownWithValidation` | `compressDescription` | ✓ WIRED | `shrink.ts:16` |
-| `runProxy` | `upstream.stdout` | Single `NdjsonReadBuffer` data handler | ✓ WIRED | Ein Listener, kein paralleles pipe→stdout |
-| `BETTER_TOKEN_SHRINK_FIELDS` | `shrinkListResponse` fields Set | `parseProxyConfig → config.shrinkFields` | ✓ WIRED | `config.ts:103` → `proxy.ts:44-50` |
-| CLI `--mode` | `config.mode` | overrides `BETTER_TOKEN_MODE` | ✓ WIRED | `resolveMode` CLI first |
-| JSON.parse failure | stdout Originalzeile | `writeNdjsonLine` + stderr once | ✓ WIRED | `proxy.ts:30-33` |
-| Upstream exit code | `process.exit(code)` | D-15 via CLI | ✓ WIRED | `runProxy` resolve → `cli.ts:499` |
+| `cli.ts` proxy action | `runProxy` | `parseProxyConfig → runProxy` | ✓ WIRED | `cli.ts:17,492-498` |
+| `compressBalanced` / MCP patterns | `compressDescription` | `compressMarkdownWithValidation` (D-05) | ✓ WIRED | `shrink.ts:16` unchanged path |
+| `filesystem-tools-descriptions.json` | `mcp-descriptions.test.ts` | Corpus char-gate | ✓ WIRED | Fixture load + ≥8% asserts |
+| `mock-upstream-filesystem.ts` | `proxy.test.ts` | spawn proxy; assert shrink | ✓ WIRED | Integration G-02-2 L770–816 |
+| `BETTER_TOKEN_SHRINK_FIELDS` | `shrinkListResponse` | config → proxy | ✓ WIRED | Prior (no 02-04 regression) |
+| JSON.parse failure | stdout Originalzeile | catch + write | ✓ WIRED | Prior |
 
-> gsd-tools `verify.key-links` meldete false (from-Pfade keine Dateipfade) — manuell verifiziert.
+> gsd-tools `verify.key-links` meldet false (from-Pfade keine Dateipfade) — manuell verifiziert.
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 | -------- | ------------- | ------ | ------------------ | ------ |
-| `proxy.ts` handleUpstreamLine | `parsed` / `line` | Upstream stdout NDJSON | Ja — echte Upstream-Bytes | ✓ FLOWING |
-| `shrinkListResponse` | `record.description` | List-Item aus Upstream JSON | Ja — komprimiert via core | ✓ FLOWING |
-| `parseProxyConfig` | `shrinkFields` / `mode` | Env + CLI | Ja — echte Env-Werte | ✓ FLOWING |
+| `compressor.ts` BALANCED_MCP_PATTERNS | prose lines | Fixture / live MCP descriptions | Ja — 4108→3576 gemessen | ✓ FLOWING |
+| `shrink.ts` compressDescription | `content` | `compressMarkdownWithValidation` | Ja — echte L1-Ausgabe | ✓ FLOWING |
+| `proxy.ts` handleUpstreamLine | list `description` | Upstream NDJSON → shrink | Ja — Integration ≥8% | ✓ FLOWING |
+| `.cursor/mcp.json` demo | upstream args | mock-upstream-filesystem.ts | Config→gleicher Pfad wie Integration | ✓ FLOWING (config); IDE visual → Human |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | -------- | ------- | ------ | ------ |
-| Full shrink-mcp suite | `npx vitest run` in `packages/shrink-mcp` | 35/35 passed, exit 0 | ✓ PASS |
-| MCP-02 named | `vitest run -t "MCP-02: tools/call…"` | passed | ✓ PASS |
-| Default balanced | `vitest run -t "default: balanced mode"` | passed | ✓ PASS |
-| CLI proxy help | `node packages/core/dist/cli.js proxy --help` | Usage + --mode/--debug | ✓ PASS |
+| G-02-2 Corpus | `npm test --workspace=@better-token/core -- tests/unit/mcp-descriptions.test.ts` | 1/1 passed | ✓ PASS |
+| G-02-2 Proxy | `vitest run -t "G-02-2"` in shrink-mcp | 2 passed (unit+integration) | ✓ PASS |
+| MCP-02 Regression | `vitest run -t "MCP-02"` | passed | ✓ PASS |
+| MCP-01 Regression | `vitest run -t "MCP-01"` | passed | ✓ PASS |
+| Live compress probe | node compressMarkdownWithValidation ×14 | 4108→3576, 9 changed, ~12.95% | ✓ PASS |
 
 ### Probe Execution
 
@@ -130,62 +134,49 @@ User story: «As a developer using an MCP-capable IDE, I want to route any MCP s
 
 | Requirement | Source Plan | Description | Status | Evidence |
 | ----------- | ---------- | ----------- | ------ | -------- |
-| MCP-01 | 02-01 | Proxy komprimiert Descriptions in tools/prompts/resources list | ✓ SATISFIED | Integration MCP-01 + shrink.ts |
-| MCP-02 | 02-01 | Requests + tools/call Responses unberührt | ✓ SATISFIED | stdin.pipe + MCP-02 Test |
-| MCP-03 | 02-03 | Parse-Error → Pass-through | ✓ SATISFIED | MCP-03/D-13 Tests |
-| MCP-04 | 02-02 | Felder via Env konfigurierbar | ✓ SATISFIED | Config Unit + MCP-04 Integration |
+| MCP-01 | 02-01, 02-04 | Proxy komprimiert Descriptions in tools/prompts/resources list | ✓ SATISFIED | MCP-01 + G-02-2 technical prose path |
+| MCP-02 | 02-01 | Requests + tools/call Responses unberührt | ✓ SATISFIED | MCP-02 Integration (re-run) |
+| MCP-03 | 02-03 | Parse-Error → Pass-through | ✓ SATISFIED | Prior + keine Regression |
+| MCP-04 | 02-02 | Felder via Env konfigurierbar | ✓ SATISFIED | Prior + keine Regression |
 
 Keine orphaned Requirements für Phase 2 — alle vier IDs in PLAN-Frontmatter und REQUIREMENTS.md Traceability-Tabelle.
 
-### Prohibitions (judgment-tier, flagged)
+### Prohibitions (judgment-tier)
 
-| Prohibition | LLM-Judge | Evidence | Flag |
-| ----------- | --------- | -------- | ---- |
-| Keine erfundenen Descriptions | satisfied | `shrink.ts` skip wenn key fehlt / non-string | unverified-prohibition — human review |
-| Kein stdout-Noise | satisfied | Diagnostics nur `process.stderr.write` | unverified-prohibition — human review |
-| Keine Request Parse/Reserialize | satisfied | `stdin.pipe` only | unverified-prohibition — human review |
-| Kein `@modelcontextprotocol/sdk` | satisfied | Kein Import in shrink-mcp/core runtime | unverified-prohibition — human review |
-| Invalid SHRINK_FIELDS nie silent | satisfied | D-12 Warnung + Defaults | unverified-prohibition — human review |
-| Nur erlaubte Field-IDs | satisfied | `ALLOWED_SHRINK_FIELDS` Set | unverified-prohibition — human review |
-| Parse-Fail: Original bytes only | satisfied | catch → write original line | unverified-prohibition — human review |
-| Keine Shrink-Stats ohne debug | satisfied | `emitShrinkStats` gated; D-14 Tests | unverified-prohibition — human review |
+| Prohibition | Status | Evidence | Flag |
+| ----------- | ------ | -------- | ---- |
+| Keine erfundenen Descriptions | UAT-resolved | UAT Test 3 pass 2026-07-25 | human-resolved |
+| Kein stdout-Noise | UAT-resolved | UAT Test 3 | human-resolved |
+| Keine Request Parse/Reserialize | UAT-resolved | stdin.pipe + MCP-02 | human-resolved |
+| Kein `@modelcontextprotocol/sdk` | UAT-resolved | Kein Import in packages src | human-resolved |
+| Invalid SHRINK_FIELDS nie silent | UAT-resolved | D-12 | human-resolved |
+| Nur erlaubte Field-IDs | UAT-resolved | Allowlist | human-resolved |
+| Parse-Fail: Original bytes only | UAT-resolved | MCP-03/D-13 | human-resolved |
+| Keine Shrink-Stats ohne debug | UAT-resolved | D-14 | human-resolved |
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | ---- | ---- | ------- | -------- | ------ |
-| — | — | Keine TBD/FIXME/XXX in Phase-Code | — | — |
-| `proxy.ts` | 72-74 | UTF-8 Chunk-Grenze ohne StringDecoder | ℹ️ Info | Advisory aus 02-REVIEW WR-01 — kein Must-Have-Fail |
-| `proxy.ts` | 61-107 | Kein SIGINT→upstream.kill | ℹ️ Info | Advisory WR-04 — Orphan-Risiko |
-| `02-VALIDATION.md` | 43-49 | TBD in Planungsartefakt | ℹ️ Info | Traceability-Tabelle nicht aktualisiert; kein Runtime-Code |
+| — | — | Keine TBD/FIXME/XXX in 02-04 Runtime-Code | — | — |
+| `compressor.ts` | 68 | `PLACEHOLDER_REGEX` Match (false positive on debt scan) | ℹ️ Info | Validator-Placeholder, kein Stub |
+| `proxy.ts` | — | UTF-8 Chunk / SIGINT Advisories aus 02-REVIEW | ℹ️ Info | Unverändert, kein Must-Have-Fail |
 
 ### Human Verification Required
 
-### 1. IDE Transparent Proxy
+### 1. UAT Test 2 Reconfirm (G-02-2 / Token sparen sichtbar)
 
-**Test:** `better-token proxy -- <upstream>` in IDE-mcp.json eintragen, MCP neu laden, Tools-Liste + einen `tools/call` prüfen  
-**Expected:** Liste lädt; Descriptions kürzer; Call OK; kein Protokollbruch  
-**Why human:** Echte IDE-stdio-MCP-Verbindung nicht in CI automatisierbar (02-03 `<human-check>`)
-
-### 2. MVP User-Flow Outcome
-
-**Test:** End-to-end als Entwickler: Proxy starten → verbinden → kleinere Descriptions sehen → Tool-Call  
-**Expected:** Outcome „Token sparen ohne Tool-Calls zu brechen“  
-**Why human:** MVP User-Flow-Walkthrough
-
-### 3. Judgment-Prohibitions
-
-**Test:** Acht flagged Must-NOTs gegen Code/Verhalten bestätigen  
-**Expected:** Alle halten  
-**Why human:** ADR-550 judgment-tier — LLM-Judge nicht autoritativ
+**Test:** IDE MCP neu laden mit `better-token-proxy` (live filesystem) und/oder `better-token-proxy-demo` (lokaler Corpus-Mock). tools/list Descriptions mit Direct-Upstream vergleichen; einen `tools/call` ausführen.  
+**Expected:** Messbare Reduktion (nicht 4108→4108); bei Debug stderr Estimated before/after; tools/call OK.  
+**Why human:** 02-04 SUMMARY D4 `human_judgment: true`; vorheriger UAT-Fail braucht Bestätigung dass Outcome jetzt sichtbar ist.
 
 ### Gaps Summary
 
-Keine technischen Gaps gegen ROADMAP Success Criteria oder PLAN must_haves. Suite 35/35 grün. Status `human_needed` wegen IDE-Checkpoint, MVP User-Flow-Bestätigung und flagged judgment-Prohibitions — nicht wegen fehlender Implementation.
+Keine technischen Gaps. G-02-2 geschlossen: Balanced L1 + Corpus-Fixture + Proxy-Integration beweisen ≥8% Char-Savings auf realen filesystem MCP Descriptions (gemessen ~13%). MCP-01..04 weiterhin SATISFIED. Status `human_needed` nur wegen IDE-Reconfirm des sichtbaren Token-sparen-Outcomes nach Gap-Closure — nicht wegen fehlender Implementation.
 
 **Empfehlung (nicht blockierend):** ROADMAP-Ziel via `/gsd mvp-phase 02` in User-Story-Format bringen.
 
 ---
 
-_Verified: 2026-07-25T03:54:58Z_  
+_Verified: 2026-07-25T05:09:00Z_  
 _Verifier: Claude (gsd-verifier)_
