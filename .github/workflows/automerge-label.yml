@@ -1,0 +1,26 @@
+name: Automerge Label
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  add-automerge-label:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' ||
+      github.event.pull_request.user.login == 'dependabot' ||
+      github.event.pull_request.user.login == 'imgbot[bot]' ||
+      github.event.pull_request.user.login == 'ImgBotApp'
+    steps:
+      - name: Add automerge label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --add-label automerge
