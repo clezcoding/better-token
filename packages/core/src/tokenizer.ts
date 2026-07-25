@@ -6,10 +6,6 @@ const FRONTMATTER_REGEX = /^(---\r?\n[\s\S]*?\r?\n---\r?\n)([\s\S]*)$/;
 const FENCE_OPEN_REGEX = /^(\s{0,3})(`{3,}|~{3,})(.*)$/;
 const URL_REGEX = /https?:\/\/[^\s)]+/g;
 const INLINE_CODE_REGEX = /`[^`\n]+`/g;
-// Segment + separator form avoids polynomial backtracking on '/' and '-'
-// (CodeQL js/polynomial-redos: old [\w\-/\\.]+ overlapped separators).
-const PATH_REGEX =
-  /(?:\.\/|\.\.\/|\/|[A-Za-z]:\\)[\w.-]+(?:[\/\\][\w.-]+)*\b|[\w.-]+(?:[\/\\][\w.-]+)+/g;
 
 /** Linear ATX heading parse — avoids \s+/(.*) space backtracking (CodeQL #3/#6). */
 function matchHeadingLine(line: string): [hashes: string, title: string] | null {
@@ -28,6 +24,121 @@ function matchHeadingLine(line: string): [hashes: string, title: string] | null 
     i += 1;
   }
   return [hashes, line.slice(i)];
+}
+
+function isPathSegmentChar(c: string): boolean {
+  return (
+    (c >= "a" && c <= "z") ||
+    (c >= "A" && c <= "Z") ||
+    (c >= "0" && c <= "9") ||
+    c === "_" ||
+    c === "." ||
+    c === "-"
+  );
+}
+
+function isPathSeparator(c: string): boolean {
+  return c === "/" || c === "\\";
+}
+
+function isWordChar(c: string): boolean {
+  return (
+    (c >= "a" && c <= "z") ||
+    (c >= "A" && c <= "Z") ||
+    (c >= "0" && c <= "9") ||
+    c === "_"
+  );
+}
+
+/**
+ * Linear path match at index — no regex (CodeQL #4/#5 ReDoS on path patterns).
+ * Mirrors prior semantics: prefixed paths (./ ../ / X:\) or relative with ≥1 separator.
+ */
+function matchPathAt(text: string, start: number): number {
+  let i = start;
+  let prefixed = false;
+
+  if (text.startsWith("./", i)) {
+    i += 2;
+    prefixed = true;
+  } else if (text.startsWith("../", i)) {
+    i += 3;
+    prefixed = true;
+  } else if (text[i] === "/") {
+    i += 1;
+    prefixed = true;
+  } else if (
+    i + 2 < text.length &&
+    ((text[i]! >= "A" && text[i]! <= "Z") || (text[i]! >= "a" && text[i]! <= "z")) &&
+    text[i + 1] === ":" &&
+    text[i + 2] === "\\"
+  ) {
+    i += 3;
+    prefixed = true;
+  }
+
+  if (prefixed) {
+    if (i >= text.length || !isPathSegmentChar(text[i]!)) {
+      return -1;
+    }
+    while (i < text.length && isPathSegmentChar(text[i]!)) {
+      i += 1;
+    }
+    while (
+      i < text.length &&
+      isPathSeparator(text[i]!) &&
+      i + 1 < text.length &&
+      isPathSegmentChar(text[i + 1]!)
+    ) {
+      i += 1;
+      while (i < text.length && isPathSegmentChar(text[i]!)) {
+        i += 1;
+      }
+    }
+    // Former \b: reject if next char continues a word token.
+    if (i < text.length && isWordChar(text[i]!)) {
+      return -1;
+    }
+    return i;
+  }
+
+  // Relative: segment (sep segment)+
+  if (!isPathSegmentChar(text[i]!)) {
+    return -1;
+  }
+  let j = i;
+  while (j < text.length && isPathSegmentChar(text[j]!)) {
+    j += 1;
+  }
+  let sepCount = 0;
+  while (
+    j < text.length &&
+    isPathSeparator(text[j]!) &&
+    j + 1 < text.length &&
+    isPathSegmentChar(text[j + 1]!)
+  ) {
+    sepCount += 1;
+    j += 1;
+    while (j < text.length && isPathSegmentChar(text[j]!)) {
+      j += 1;
+    }
+  }
+  return sepCount > 0 ? j : -1;
+}
+
+function findPathSpans(text: string): Array<{ start: number; end: number }> {
+  const spans: Array<{ start: number; end: number }> = [];
+  let i = 0;
+  while (i < text.length) {
+    const end = matchPathAt(text, i);
+    if (end > i) {
+      spans.push({ start: i, end });
+      i = end;
+    } else {
+      i += 1;
+    }
+  }
+  return spans;
 }
 
 function makeNonce(): string {
@@ -102,7 +213,7 @@ export function extractUrls(text: string): string[] {
 }
 
 export function extractPaths(text: string): string[] {
-  return [...text.matchAll(PATH_REGEX)].map((m) => m[0]);
+  return findPathSpans(text).map(({ start, end }) => text.slice(start, end));
 }
 
 export function extractInlineCodes(text: string): string[] {
@@ -137,6 +248,31 @@ function protectMatches(
     tokens[placeholder] = match;
     return placeholder;
   });
+}
+
+function protectPaths(
+  text: string,
+  tokens: TokenMap,
+  counter: { value: number },
+  nonce: string,
+): string {
+  const spans = findPathSpans(text);
+  if (spans.length === 0) {
+    return text;
+  }
+  let result = "";
+  let cursor = 0;
+  for (const { start, end } of spans) {
+    result += text.slice(cursor, start);
+    const match = text.slice(start, end);
+    const placeholder = makePlaceholder("PATH", counter.value, nonce);
+    counter.value += 1;
+    tokens[placeholder] = match;
+    result += placeholder;
+    cursor = end;
+  }
+  result += text.slice(cursor);
+  return result;
 }
 
 function protectCodeBlocks(
@@ -198,7 +334,7 @@ export function tokenizeMarkdown(content: string): { text: string; tokens: Token
   bodyText = protectCodeBlocks(bodyText, tokens, counter, nonce);
   bodyText = protectMatches(bodyText, INLINE_CODE_REGEX, "INLINE_CODE", tokens, counter, nonce);
   bodyText = protectMatches(bodyText, URL_REGEX, "URL", tokens, counter, nonce);
-  bodyText = protectMatches(bodyText, PATH_REGEX, "PATH", tokens, counter, nonce);
+  bodyText = protectPaths(bodyText, tokens, counter, nonce);
   bodyText = protectHeadings(bodyText, tokens, counter, nonce);
 
   const carved = extractCarveOuts(bodyText, nonce);
