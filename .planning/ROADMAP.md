@@ -1,5 +1,7 @@
 # Roadmap: better-token
 
+**Source PRD:** [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignored)
+
 ## Overview
 
 `better-token` ships as a depth-first, vertical MVP: each phase delivers an end-to-end, user-observable capability rather than a horizontal layer. Phase 1 builds the deterministic L1 compression engine with its byte-exact validation gate — the product core. Phase 2 wraps that engine in a universal MCP shrink proxy for Tier C savings across any MCP-capable IDE. Phase 3 installs deep Tier A (Claude Code) and Tier B (Cursor) adapters with per-turn L2 style re-injection. Phase 4 closes the loop with honest L3 stats and verbosity verification. Phase 5 ties everything together via a canonical L4 profile compiler and a one-command auto-detecting installer, with privacy enforced throughout. Every v1 requirement maps to exactly one phase; coverage is 26/26.
@@ -67,7 +69,20 @@ Plans:
   3. `tools/call` request payloads and responses pass through byte-identical — no mutation, no data loss
   4. When the proxy hits a parse error it falls back to pass-through, and the user can configure which fields are compressed via environment variables
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Transparent stdio proxy + list-description shrink (MCP-01, MCP-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 02-02-PLAN.md — BETTER_TOKEN_* field/mode config allowlist (MCP-04)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 02-03-PLAN.md — Parse-error pass-through + exit/debug hardening + IDE verify (MCP-03)
 
 ### Phase 3: Claude Code & Cursor Adapters
 
