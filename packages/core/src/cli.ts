@@ -14,6 +14,7 @@ import {
 import { MissingSidecarError, readFileWithCap, restoreFromSidecar } from "./backup.js";
 import { validate } from "./validator.js";
 import type { CompressionMode } from "./index.js";
+import { runProxy, parseProxyConfig } from "@better-token/shrink-mcp";
 
 const OptionsSchema = z.object({
   mode: z.enum(["safe", "balanced", "aggressive"]),
@@ -348,6 +349,26 @@ async function runRollback(filePath: string): Promise<number> {
   }
 }
 
+function extractUpstreamFromArgv(): {
+  upstreamCmd: string;
+  upstreamArgs: string[];
+} | null {
+  const proxyIndex = process.argv.indexOf("proxy");
+  if (proxyIndex === -1) {
+    return null;
+  }
+
+  const separatorIndex = process.argv.indexOf("--", proxyIndex);
+  if (separatorIndex !== -1 && separatorIndex < process.argv.length - 1) {
+    return {
+      upstreamCmd: process.argv[separatorIndex + 1]!,
+      upstreamArgs: process.argv.slice(separatorIndex + 2),
+    };
+  }
+
+  return null;
+}
+
 const cli = new Command();
 
 cli
@@ -444,6 +465,37 @@ cli
   .action(async (path: string) => {
     const parsed = PathSchema.parse(path);
     const exitCode = await runRollback(parsed);
+    process.exit(exitCode);
+  });
+
+cli
+  .command("proxy")
+  .description("Stdio MCP shrink proxy in front of an upstream server")
+  .option("--mode <mode>", "Compression mode: safe|balanced|aggressive")
+  .option("--debug", "Emit shrink diagnostics to stderr", false)
+  .allowUnknownOption()
+  .allowExcessArguments()
+  .action(async (opts: { mode?: string; debug?: boolean }, command) => {
+    const fromArgv = extractUpstreamFromArgv();
+    const rawArgs = command.args as string[];
+    const upstreamCmd = fromArgv?.upstreamCmd ?? rawArgs[0];
+    const upstreamArgs = fromArgv?.upstreamArgs ?? rawArgs.slice(1);
+
+    if (!upstreamCmd) {
+      process.stderr.write(
+        "better-token proxy: usage: better-token proxy -- <upstream> [args...]\n",
+      );
+      process.exit(1);
+      return;
+    }
+
+    const config = parseProxyConfig({
+      cliMode: opts.mode,
+      debug: opts.debug,
+      upstreamCmd,
+      upstreamArgs,
+    });
+    const exitCode = await runProxy(config);
     process.exit(exitCode);
   });
 

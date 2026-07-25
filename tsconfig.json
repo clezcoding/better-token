@@ -6,10 +6,12 @@
     "strict": true,
     "target": "ES2022",
     "paths": {
-      "@better-token/core": ["./packages/core/src"]
+      "@better-token/core": ["./packages/core/src"],
+      "@better-token/shrink-mcp": ["./packages/shrink-mcp/src"]
     }
   },
   "references": [
-    { "path": "./packages/core" }
+    { "path": "./packages/core" },
+    { "path": "./packages/shrink-mcp" }
   ]
 }
