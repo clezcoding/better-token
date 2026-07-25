@@ -12,21 +12,12 @@ re_verification:
   previous_status: human_needed
   previous_score: 26/27
   gaps_closed:
-
     - "G-02-2: measurable Token sparen on filesystem MCP descriptions (UAT Test 2) — BALANCED_MCP_PATTERNS + corpus/proxy gates"
     - "D4 IDE visibility: live better-token-proxy tools/list 4108→3576 (~12.95%); tools/call OK"
   gaps_remaining: []
   regressions: []
 behavior_unverified_items: []
-  - truth: "Demo mcp.json entry makes Token sparen visible without breaking tools/call"
-    test: "IDE: better-token-proxy und/oder better-token-proxy-demo neu laden; tools/list Descriptions vs Direct-Upstream vergleichen; tools/call ausführen"
-    expected: "Messbare Char-/Token-Reduktion sichtbar (nicht 4108→4108); tools/call OK"
-    why_human: "02-04 SUMMARY D4 human_judgment — IDE-Panel-Sichtbarkeit nicht in CI; UAT Test 2 war fail vor Gap-Closure und braucht Human-Reconfirm"
-human_verification:
-
-  - test: "UAT Test 2 Reconfirm nach G-02-2: Proxy starten → Client verbinden → tools/list kleiner → tools/call OK"
-    expected: "A/B tools/list zeigt messbare Savings (≥8% Char auf Filesystem-Corpus-Pfad); Outcome Token sparen sichtbar; tools/call ungebrochen"
-    why_human: "MVP Outcome-Klausel + 02-04 D4; automatische Corpus/Proxy-Gates grün, Live-IDE-Bestätigung nach vorherigem Fail noch offen"
+human_verification: []
 uat_completed: 2026-07-25T05:46:00Z
 uat_result: "3/3 passed — live IDE 4108→3576 + tools/call OK"
 ---
@@ -37,7 +28,7 @@ uat_result: "3/3 passed — live IDE 4108→3576 + tools/call OK"
 
 **PLAN User Story (für MVP Flow):** As a developer using an MCP-capable IDE, I want to route any MCP server through `better-token` and get smaller tool/prompt/resource descriptions, so that I save tokens without breaking tool calls.
 
-**Verified:** 2026-07-25T05:09:00Z  
+**Verified:** 2026-07-25T05:46:00Z  
 **Status:** passed  
 **Re-verification:** Yes — after gap closure 02-04 (G-02-2)
 
@@ -177,7 +168,7 @@ Keine orphaned Requirements für Phase 2 — alle vier IDs in PLAN-Frontmatter u
 
 ### Gaps Summary
 
-Keine technischen Gaps. G-02-2 geschlossen: Balanced L1 + Corpus-Fixture + Proxy-Integration beweisen ≥8% Char-Savings auf realen filesystem MCP Descriptions (gemessen ~13%). MCP-01..04 weiterhin SATISFIED. Status `human_needed` nur wegen IDE-Reconfirm des sichtbaren Token-sparen-Outcomes nach Gap-Closure — nicht wegen fehlender Implementation.
+Keine technischen Gaps. G-02-2 geschlossen: Balanced L1 + Corpus-Fixture + Proxy-Integration beweisen ≥8% Char-Savings auf realen filesystem MCP Descriptions (gemessen ~13%). MCP-01..04 weiterhin SATISFIED. Status `passed` — UAT 3/3 complete; live IDE reconfirm 4108→3576 (~13%) + tools/call OK.
 
 **Empfehlung (nicht blockierend):** ROADMAP-Ziel via `/gsd mvp-phase 02` in User-Story-Format bringen.
 
