@@ -4,15 +4,15 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 2
 current_phase_name: MCP Shrink Proxy
-status: shipped
-stopped_at: Phase 2 context gathered
-last_updated: "2026-07-25T03:15:38.022Z"
+status: ready_to_execute
+stopped_at: Phase 2 plans revised after checker feedback
+last_updated: "2026-07-25T05:28:00.000Z"
 last_activity: 2026-07-25
-last_activity_desc: PRD renamed to better-token; linked from GSD docs
+last_activity_desc: Phase 2 plans revised (Nyquist RED verify, D-12 mixed tokens, Open Questions RESOLVED)
 progress:
-  total_phases: 2
+  total_phases: 5
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
 ---
 
@@ -29,11 +29,11 @@ Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignor
 ## Current Position
 
 Phase: 2 — MCP Shrink Proxy
-Plan: Not started
-Status: Phase 01 shipped — PR #1 (rebase onto main)
-Last activity: 2026-07-25 - PRD renamed to better-token; linked from GSD docs
+Plan: 02-01 / 02-02 / 02-03 ready (post-checker revision)
+Status: Plans revised — ready for `/gsd-execute-phase 2`
+Last activity: 2026-07-25 - Checker blockers fixed (RED automated, D-12, RESEARCH RESOLVED, graphify)
 
-Progress: [██████████] 100%
+Progress: [█████░░░░░] 50% (Phase 1 done; Phase 2 planned)
 
 ## Performance Metrics
 
