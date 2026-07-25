@@ -92,7 +92,7 @@ None yet.
 ### Blockers/Concerns
 
 - Phase 3 will need deeper research into Claude Code hook payloads and `hookSpecificOutput` behavior during compaction (flagged in research/SUMMARY.md)
-- Phase 2 will need research into stdio JSON-RPC stream buffering to avoid stream-draining regressions
+- Phase 2 research complete; stream-buffering pitfalls documented in 02-RESEARCH.md
 
 ### Quick Tasks Completed
 
@@ -111,7 +111,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T03:15:38.015Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-mcp-shrink-proxy/02-CONTEXT.md
+Last session: 2026-07-25T05:28:00.000Z
+Stopped at: Phase 2 plans revised after checker feedback — ready to execute
+Resume file: .planning/phases/02-mcp-shrink-proxy/02-01-PLAN.md
 PR: https://github.com/clezcoding/better-token/pull/1
