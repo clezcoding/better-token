@@ -2,43 +2,44 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 2
-current_phase_name: MCP Shrink Proxy
-status: shipped
-stopped_at: "Phase 01 shipped — PR #1"
-last_updated: "2026-07-24T22:53:30.147Z"
-last_activity: 2026-07-24
+current_phase: 3
+current_phase_name: Claude Code & Cursor Adapters
+status: "Phase 02 shipped — PR #17"
+stopped_at: Phase 02 complete, ready to plan Phase 3
+last_updated: "2026-07-25T06:04:26.063Z"
+last_activity: 2026-07-25
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-last_activity_desc: Phase 01 shipped — PR #1
+  total_phases: 5
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 7
+last_activity_desc: Phase 02 complete, transitioned to Phase 3
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-24)
+See: .planning/PROJECT.md (updated 2026-07-25)
+Source PRD: [`better-token-prd.md`](../better-token-prd.md) (repo root, gitignored)
 
 **Core value:** Deterministic, byte-verified input/context compression that cuts tokens without substance loss — every time, not only when the model cooperates.
-**Current focus:** Phase 2 — MCP Shrink Proxy
+**Current focus:** Phase 3 — Claude Code & Cursor Adapters
 
 ## Current Position
 
-Phase: 2 — MCP Shrink Proxy
+Phase: 3 — Claude Code & Cursor Adapters
 Plan: Not started
-Status: Phase 01 shipped — PR #1 (rebase onto main)
-Last activity: 2026-07-25 - Completed quick task 260725-a9t: CodeQL ReDoS fixes
+Status: Phase 02 shipped — PR #17
+Last activity: 2026-07-25
 
-Progress: [██████████] 100%
+Progress: [████░░░░░░] 40% (Phase 1–2 done; Phase 3 next)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 7
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -52,6 +53,7 @@ Progress: [██████████] 100%
 | 4. Honest Stats & Verification | 0 | — | — |
 | 5. Profile Compiler & Installer | 0 | — | — |
 | 01 | 3 | - | - |
+| 02 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -66,6 +68,10 @@ Progress: [██████████] 100%
 | Phase 01-l1-compression-engine-validator P01 | 8 | 4 tasks | 22 files |
 | Phase 01-l1-compression-engine-validator P02 | 4 | 2 tasks | 6 files |
 | Phase 01-l1-compression-engine-validator P03 | 4 | 2 tasks | 5 files |
+| Phase 02 P01 | 6 | 2 tasks | 15 files |
+| Phase 02-mcp-shrink-proxy P02 | 2 | 2 tasks | 4 files |
+| Phase 02-mcp-shrink-proxy P03 | 10min | 2 tasks | 9 files |
+| Phase 02 P04 | 2min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -83,6 +89,16 @@ Recent decisions affecting current work:
 - [Phase ?]: Mode switch reads original from sidecar, never stacks compression (D-13)
 - [Phase ?]: Aggressive merge skips __CARVEOUT_ blocks to preserve byte-exact carve-out boundaries
 - [Phase ?]: BETTER_TOKEN_TEST_TTY=1 hook enables D-17 subprocess integration tests
+- [Phase ?]: Upstream argv parsed from process.argv after -- (Commander strips separator from command.args)
+- [Phase ?]: Workspace deps use file: protocol because npm 11 rejected workspace:* in this environment
+- [Phase ?]: D-12 mixed valid+invalid CSV falls back to full D-09 defaults, not valid-only subset
+- [Phase ?]: Unset BETTER_TOKEN_SHRINK_FIELDS uses D-09 defaults silently; empty/whitespace warns then defaults
+- [Phase ?]: CLI --mode overrides BETTER_TOKEN_MODE when both set (A3)
+- [Phase ?]: Parse-error stderr always-on regardless of debug (D-13); shrink stats gated on BETTER_TOKEN_DEBUG (D-14/D-16)
+- [Phase ?]: Batch JSON-RPC arrays pass through unchanged without shrink (A2)
+- [Phase ?]: Partial trailing NDJSON flushed as pass-through on upstream close
+- [Phase ?]: BALANCED_MCP_PATTERNS strip filesystem MCP scope suffix, preamble, qualifiers in balanced mode (G-02-2)
+- [Phase ?]: Dual mcp.json: live filesystem proxy + local mock-upstream-filesystem demo
 
 ### Pending Todos
 
@@ -90,8 +106,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3 will need deeper research into Claude Code hook payloads and `hookSpecificOutput` behavior during compaction (flagged in research/SUMMARY.md)
-- Phase 2 will need research into stdio JSON-RPC stream buffering to avoid stream-draining regressions
+- [Phase 3] Deeper research into Claude Code hook payloads and `hookSpecificOutput` behavior during compaction (flagged in research/SUMMARY.md)
+- [Phase 2→3] shrink-mcp depends on built `@better-token/core` dist — rebuild core before shrink-mcp unit tests that exercise L1 patterns
 
 ### Quick Tasks Completed
 
@@ -99,8 +115,6 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260725-1my | Fix .gitignore + GitHub CI/automation stack + verify GSD Cursor config | 2026-07-25 | 22a9bdc | [260725-1my-task-1-fix-gitignore-so-only-relevant-fi](./quick/260725-1my-task-1-fix-gitignore-so-only-relevant-fi/) |
 | 260725-1x5 | Branch protection on main via gh CLI + land prior CI on main | 2026-07-25 | 91a24ae | [260725-1x5-set-up-github-branch-protection-on-main-](./quick/260725-1x5-set-up-github-branch-protection-on-main-/) |
-| 260725-a0s | PR: labels+automerge+CI + fix all Dependabot security alerts (vitest 4.1.10) | 2026-07-25 | a5b05f5 | [260725-a0s-push-labels-automerge-ci-branch-as-pr-th](./quick/260725-a0s-push-labels-automerge-ci-branch-as-pr-th/) |
-| 260725-a9t | Fix CodeQL polynomial ReDoS (#1-6) + local tree integrity audit | 2026-07-25 | b20b5b5 | [260725-a9t-fix-all-code-scanning-security-issues-th](./quick/260725-a9t-fix-all-code-scanning-security-issues-th/) |
 
 ## Deferred Items
 
@@ -112,7 +126,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25
-Stopped at: Phase 01 PR #1 rebased onto main (awaiting merge)
-Resume file: .planning/.continue-here.md
+Last session: 2026-07-25T05:56:30Z
+Stopped at: Phase 02 complete, ready to plan Phase 3
+Resume file: None
 PR: https://github.com/clezcoding/better-token/pull/1

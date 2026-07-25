@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "better-token-proxy": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "packages/core/src/cli.ts",
+        "proxy",
+        "--",
+        "npx",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/puzzless/Desktop/better-token"
+      ],
+      "env": { "BETTER_TOKEN_DEBUG": "1" }
+    },
+    "better-token-proxy-demo": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "packages/core/src/cli.ts",
+        "proxy",
+        "--",
+        "npx",
+        "tsx",
+        "packages/shrink-mcp/tests/fixtures/mock-upstream-filesystem.ts"
+      ],
+      "env": { "BETTER_TOKEN_DEBUG": "1" }
+    }
+  }
+}

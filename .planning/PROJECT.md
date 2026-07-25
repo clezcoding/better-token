@@ -24,10 +24,10 @@ Deterministic, byte-verified input/context compression that cuts tokens without 
 - [x] Deterministic rule/memory file compression with byte-exact validation gate (code, inline code, URLs, paths, headings preserved) — Validated in Phase 1: L1 Compression Engine & Validator
 - [x] Switchable L1 aggression modes: `safe` / `balanced` / `aggressive` (default `balanced`); validator always on — Validated in Phase 1: L1 Compression Engine & Validator
 - [x] Security carve-outs: never compress code, exact errors, security warnings, irreversible confirmations — Validated in Phase 1: L1 Compression Engine & Validator
+- [x] MCP shrink proxy that compresses tool/prompt/resource `description` fields only; pass-through on parse errors; tools/call byte-identical — Validated in Phase 2: MCP Shrink Proxy
 
 ### Active
 
-- [ ] MCP shrink proxy that compresses tool/prompt/resource `description` fields only; pass-through on parse errors
 - [ ] Claude Code adapter with per-turn style injection (Tier A hooks) for output terseness
 - [ ] Cursor adapter (always-apply rule + MCP) as second depth target
 - [ ] Honest stats: measured vs estimated usage; separate input savings, output savings, framework overhead, net (including negative net)
@@ -64,7 +64,7 @@ Deterministic, byte-verified input/context compression that cuts tokens without 
 
 **Prior art to reuse/extend from caveman:** compress + validate pipeline ideas; MCP shrink middleware pattern. Reject: prompt-only always-on with session-start-only injection and no post-hoc measurement.
 
-**Source PRD:** `Tokenwise-PRD.md` (draft v0.1, 2026-07-24) — product intent retained; name and L1 approach updated by decisions below.
+**Source PRD:** [`better-token-prd.md`](../better-token-prd.md) (draft v0.1, 2026-07-24; gitignored) — product intent; name and L1 approach locked in decisions below.
 
 ## Constraints
 
@@ -82,13 +82,16 @@ Deterministic, byte-verified input/context compression that cuts tokens without 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Rename Tokenwise → better-token | npm/GitHub/domains taken; TokenwiseHQ is LLM cost product (direct collision) | — Pending |
+| Rename Tokenwise → better-token | npm/GitHub/domains taken; TokenwiseHQ is LLM cost product (direct collision) | Done — name locked; PRD updated |
 | Depth before breadth | Solid L1+L3 on Claude Code + Cursor beats thin support everywhere | — Pending |
 | OSS from day one | Public repo, benchmarks, community; not private-first | — Pending |
-| L1 = deterministic heuristics, not LLM rewrite | Reliability and offline; aligns with core thesis | — Pending |
-| L1 modes: safe / balanced / aggressive (default balanced) | User-selectable aggression; validator always on | — Pending |
+| L1 = deterministic heuristics, not LLM rewrite | Reliability and offline; aligns with core thesis | Done — Phase 1 |
+| L1 modes: safe / balanced / aggressive (default balanced) | User-selectable aggression; validator always on | Done — Phase 1 |
 | MIT + English docs | Match caveman/OSS norms; EN for global contributors | — Pending |
 | No telemetry/backend in OSS core | Privacy by default | — Pending |
+| MCP shrink: description-only + raw stdin pipe | Preserve tools/call byte-identity; stderr-only diagnostics | Done — Phase 2 (`@better-token/shrink-mcp`) |
+| BALANCED_MCP_PATTERNS for technical MCP prose | Filler-only L1 left filesystem corpus at 0% savings | Done — Phase 2 (4108→3576 ~13%) |
+| Dual demo mcp.json (live FS + mock corpus) | Visible Token sparen without breaking tools/call | Done — Phase 2 |
 
 ## Evolution
 
@@ -109,7 +112,7 @@ This document evolves at phase transitions and milestone boundaries.
 
 ## Current State
 
-Phase 1 complete — `@better-token/core` ships `compress` / `rollback` / `validate` with three modes, `.original` sidecar, and byte-exact validator (65 tests green). Next: Phase 2 MCP Shrink Proxy.
+Phase 2 complete — `@better-token/shrink-mcp` + `better-token proxy` shrink list descriptions (MCP-01..04), tools/call pass-through, parse fallback, field allowlist, G-02-2 technical prose (~13% on filesystem corpus). UAT 3/3, SECURITY threats_open:0, Nyquist compliant. Next: Phase 3 Claude Code & Cursor Adapters.
 
 ---
-*Last updated: 2026-07-24 after Phase 1 completion*
+*Last updated: 2026-07-25 after Phase 2*
